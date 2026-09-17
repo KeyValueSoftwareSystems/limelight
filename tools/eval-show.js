@@ -16,6 +16,7 @@
      alive        no long dead stretch while the band plays. A `follow` binding
                   held the rig at 1% through the whole first chorus.
      intentional  every dark stretch is either a darkening cue or a real hole in
+     breath       a blackout on loud music is one beat, never two
                   the music. Blackouts were firing over a vocal at full voice,
                   because "silence" had been measured as gaps between drum hits.
      contained    a cue changes nothing outside its own span. `follow` darkened
@@ -272,6 +273,35 @@ const cues = [...(show.states || []).map(c => ({ ...c, kind: "state" })),
   check("intentional", bad === 0,
     bad ? bad + " of " + total + " dark stretches are not a cue and not a hole in the music (first at " + firstAt.toFixed(1) + "s)"
         : total + " dark stretches, every one deliberate");
+}
+
+/* 3b. breath — a blackout on loud music is one beat, never two ------------- */
+{
+  /* Renjith heard "false blacks": stretches where the band is playing at full
+     weight and the room is black for two beats. Every one of them was a cue we
+     wrote on purpose, so `intentional` passed -- but the ear is right: when
+     the music never goes quiet, a breath is one beat and anything longer reads
+     as a fault. A dark stretch is allowed to run long only when the band is
+     genuinely quiet under it. */
+  const beatS = 60 / ((score.key_tempo && score.key_tempo.bpm) || 120);
+  const LIMIT = 1.25 * beatS;
+  let bad = 0, firstAt = null, longest = 0;
+  let run = 0, start = 0;
+  const judge = () => {
+    if (run < 0.3) return;
+    let sum = 0, n = 0;
+    for (let u = start; u < start + run; u += 0.05) { sum += bandAt(u); n++; }
+    const loud = n && sum / n > 0.45;
+    if (loud && run > LIMIT) { bad++; if (firstAt == null) firstAt = start; longest = Math.max(longest, run); }
+  };
+  for (let i = 0; i < F.length; i++) {
+    if (rigLv(F[i]) < 0.06) { if (run === 0) start = i / fps; run += 1 / fps; }
+    else { judge(); run = 0; }
+  }
+  judge();
+  check("breath", bad === 0,
+    bad ? bad + " blackout(s) on loud music run longer than a beat (first at " + firstAt.toFixed(1) + "s, longest " + longest.toFixed(2) + "s; limit " + LIMIT.toFixed(2) + "s)"
+        : "every blackout on loud music is a beat or less");
 }
 
 /* 4. contained — a cue changes nothing outside its own span ---------------- */

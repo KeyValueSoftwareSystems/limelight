@@ -1,1478 +1,1684 @@
 {
- "schema": "limelight.show/1",
- "song": "raga-of-revenge",
- "duration_s": 131.286,
- "grid": {
-  "bpm": 118.77,
-  "beats_per_bar": 4,
-  "first_beat_s": 1.76,
-  "bars": 65,
-  "steady": 0.88,
-  "first_bar": 1,
-  "last_bar": 65,
-  "tempo": [
-   {
-    "from_beat": -2,
-    "at_s": 0.37,
-    "bpm": 90.909
-   },
-   {
-    "from_beat": -1,
-    "at_s": 1.03,
-    "bpm": 82.192
-   },
-   {
-    "from_beat": 0,
-    "at_s": 1.76,
-    "bpm": 89.552
-   },
-   {
-    "from_beat": 1,
-    "at_s": 2.43,
-    "bpm": 81.081
-   },
-   {
-    "from_beat": 2,
-    "at_s": 3.17,
-    "bpm": 90.226
-   },
-   {
-    "from_beat": 8,
-    "at_s": 7.16,
-    "bpm": 90.226
-   },
-   {
-    "from_beat": 10,
-    "at_s": 8.49,
-    "bpm": 95.238
-   },
-   {
-    "from_beat": 12,
-    "at_s": 9.75,
-    "bpm": 86.331
-   },
-   {
-    "from_beat": 14,
-    "at_s": 11.14,
-    "bpm": 93.75
-   },
-   {
-    "from_beat": 15,
-    "at_s": 11.78,
-    "bpm": 86.331
-   },
-   {
-    "from_beat": 17,
-    "at_s": 13.17,
-    "bpm": 88.235
-   },
-   {
-    "from_beat": 22,
-    "at_s": 16.57,
-    "bpm": 92.308
-   },
-   {
-    "from_beat": 23,
-    "at_s": 17.22,
-    "bpm": 113.924
-   },
-   {
-    "from_beat": 26,
-    "at_s": 18.8,
-    "bpm": 121.457
-   },
-   {
-    "from_beat": 31,
-    "at_s": 21.27,
-    "bpm": 118.421
-   },
-   {
-    "from_beat": 34,
-    "at_s": 22.79,
-    "bpm": 120.267
-   },
-   {
-    "from_beat": 43,
-    "at_s": 27.28,
-    "bpm": 116.129
-   },
-   {
-    "from_beat": 46,
-    "at_s": 28.83,
-    "bpm": 121.996
-   },
-   {
-    "from_beat": 57,
-    "at_s": 34.24,
-    "bpm": 119.908
-   },
-   {
-    "from_beat": 83,
-    "at_s": 47.25,
-    "bpm": 120
-   },
-   {
-    "from_beat": 216,
-    "at_s": 113.75,
-    "bpm": 116.883
-   },
-   {
-    "from_beat": 219,
-    "at_s": 115.29,
-    "bpm": 120.361
-   },
-   {
-    "from_beat": 239,
-    "at_s": 125.26,
-    "bpm": 124.138
-   },
-   {
-    "from_beat": 242,
-    "at_s": 126.71,
-    "bpm": 133.333
-   }
+  "schema": "limelight.show/1",
+  "song": "raga-of-revenge",
+  "duration_s": 131.286,
+  "grid": {
+    "bpm": 118.77,
+    "beats_per_bar": 4,
+    "first_beat_s": 1.76,
+    "bars": 65,
+    "steady": 0.88,
+    "first_bar": 1,
+    "last_bar": 65,
+    "tempo": [
+      {
+        "from_beat": -2,
+        "at_s": 0.37,
+        "bpm": 90.909
+      },
+      {
+        "from_beat": -1,
+        "at_s": 1.03,
+        "bpm": 82.192
+      },
+      {
+        "from_beat": 0,
+        "at_s": 1.76,
+        "bpm": 89.552
+      },
+      {
+        "from_beat": 1,
+        "at_s": 2.43,
+        "bpm": 81.081
+      },
+      {
+        "from_beat": 2,
+        "at_s": 3.17,
+        "bpm": 90.226
+      },
+      {
+        "from_beat": 8,
+        "at_s": 7.16,
+        "bpm": 90.226
+      },
+      {
+        "from_beat": 10,
+        "at_s": 8.49,
+        "bpm": 95.238
+      },
+      {
+        "from_beat": 12,
+        "at_s": 9.75,
+        "bpm": 86.331
+      },
+      {
+        "from_beat": 14,
+        "at_s": 11.14,
+        "bpm": 93.75
+      },
+      {
+        "from_beat": 15,
+        "at_s": 11.78,
+        "bpm": 86.331
+      },
+      {
+        "from_beat": 17,
+        "at_s": 13.17,
+        "bpm": 88.235
+      },
+      {
+        "from_beat": 22,
+        "at_s": 16.57,
+        "bpm": 92.308
+      },
+      {
+        "from_beat": 23,
+        "at_s": 17.22,
+        "bpm": 113.924
+      },
+      {
+        "from_beat": 26,
+        "at_s": 18.8,
+        "bpm": 121.457
+      },
+      {
+        "from_beat": 31,
+        "at_s": 21.27,
+        "bpm": 118.421
+      },
+      {
+        "from_beat": 34,
+        "at_s": 22.79,
+        "bpm": 120.267
+      },
+      {
+        "from_beat": 43,
+        "at_s": 27.28,
+        "bpm": 116.129
+      },
+      {
+        "from_beat": 46,
+        "at_s": 28.83,
+        "bpm": 121.996
+      },
+      {
+        "from_beat": 57,
+        "at_s": 34.24,
+        "bpm": 119.908
+      },
+      {
+        "from_beat": 83,
+        "at_s": 47.25,
+        "bpm": 120
+      },
+      {
+        "from_beat": 216,
+        "at_s": 113.75,
+        "bpm": 116.883
+      },
+      {
+        "from_beat": 219,
+        "at_s": 115.29,
+        "bpm": 120.361
+      },
+      {
+        "from_beat": 239,
+        "at_s": 125.26,
+        "bpm": 124.138
+      },
+      {
+        "from_beat": 242,
+        "at_s": 126.71,
+        "bpm": 133.333
+      }
+    ],
+    "refit": {
+      "tolerance_s": 0.03,
+      "segments": 24,
+      "mean_err_ms": 9.4,
+      "max_err_ms": 29.6,
+      "note": "beat 0 is the first FLAGGED downbeat; beats before it are the pickup in bar 0"
+    },
+    "pickup": {
+      "count": 2,
+      "before_bar_1": [
+        0.37,
+        1.03
+      ]
+    }
+  },
+  "built_from": "the whole protocol response: both segmentations, layers.subsection, layers.presence, chords, energy, moments, rhythm",
+  "states": [
+    {
+      "effect": "wash",
+      "amount": 0.14,
+      "colour": "#2f5bff",
+      "extent": "all",
+      "why": "The bed under the build: the whole row held on in dim blue, so the runs and the head have a cold field to cut through rather than a black one. Level 0.14 -- present, not seen.",
+      "id": "s8",
+      "section": 1,
+      "from_s": 41.75,
+      "to_s": 47.74,
+      "at": {
+        "bar": 19,
+        "beat": 1,
+        "beats": 12
+      }
+    },
+    {
+      "effect": "wash",
+      "amount": 0.14,
+      "colour": "#2f5bff",
+      "extent": "all",
+      "why": "The bed under the build: the whole row held on in dim blue, so the runs and the head have a cold field to cut through rather than a black one. Level 0.14 -- present, not seen.",
+      "id": "s9",
+      "section": 1,
+      "from_s": 47.74,
+      "to_s": 48.24,
+      "at": {
+        "bar": 22,
+        "beat": 1,
+        "beats": 1
+      }
+    },
+    {
+      "effect": "wash",
+      "amount": 0.14,
+      "colour": "#2f5bff",
+      "extent": "all",
+      "why": "The bed under the build: the whole row held on in dim blue, so the runs and the head have a cold field to cut through rather than a black one. Level 0.14 -- present, not seen.",
+      "id": "s10",
+      "section": 2,
+      "from_s": 48.24,
+      "to_s": 49.75,
+      "at": {
+        "bar": 22,
+        "beat": 1,
+        "beats": 7
+      }
+    },
+    {
+      "effect": "drive",
+      "extent": "all",
+      "why": "From the downbeat of the drop: a red core in a blue frame -- drive's two pairs call and respond, inner red, outer blue, flipping on the beat. The first red the room has seen. (Split from the state that straddled 49.75, whose first bar was sitting on the dim build bed.) Floor 0.72 so the frame is brighter than the build it answers.",
+      "id": "s10",
+      "section": 2,
+      "from_s": 49.75,
+      "to_s": 51.76,
+      "at": {
+        "bar": 22,
+        "beat": 1,
+        "beats": 7
+      },
+      "colours": [
+        "#e01313",
+        "#2f5bff"
+      ],
+      "floor": 0.72,
+      "peak": 1
+    },
+    {
+      "effect": "drive",
+      "colours": [
+        "#e01313",
+        "#2f5bff"
+      ],
+      "extent": "all",
+      "floor": 0.72,
+      "peak": 1,
+      "why": "Bars 24-25: the drop keeps arriving. Red and blue trade bars on a high floor.",
+      "id": "s11",
+      "section": 2,
+      "from_s": 51.76,
+      "to_s": 55.76,
+      "at": {
+        "bar": 24,
+        "beat": 1,
+        "beats": 8
+      }
+    },
+    {
+      "effect": "drive",
+      "extent": "all",
+      "floor": 0.76,
+      "peak": 1,
+      "why": "chorus, intensifying, drums full — A:min. Level 0.70. Floor lifted so the drop beats its own build: eight bars of the row blazing and collapsing is a big picture, and the payoff cannot be smaller than the run-up. Second drop: the same red-in-blue frame as the first, one step brighter (0.76 against 0.72). Three drops in this song and each has to be bigger than the last, or the second reads as the show losing interest.",
+      "id": "s12",
+      "section": 2,
+      "from_s": 63.76,
+      "to_s": 71.76,
+      "at": {
+        "bar": 30,
+        "beat": 1,
+        "beats": 16
+      },
+      "colours": [
+        "#e01313",
+        "#2f5bff"
+      ]
+    },
+    {
+      "effect": "drive",
+      "extent": "all",
+      "floor": 0.76,
+      "peak": 1,
+      "why": "chorus, resolving, drums light — A#. Level 0.62. Second drop: the same red-in-blue frame as the first, one step brighter (0.76 against 0.72). Three drops in this song and each has to be bigger than the last, or the second reads as the show losing interest.",
+      "id": "s13",
+      "section": 2,
+      "from_s": 71.76,
+      "to_s": 73.76,
+      "at": {
+        "bar": 34,
+        "beat": 1,
+        "beats": 19
+      },
+      "colours": [
+        "#e01313",
+        "#2f5bff"
+      ]
+    },
+    {
+      "effect": "drive",
+      "extent": "all",
+      "floor": 0.8,
+      "peak": 1,
+      "why": "chorus, developing, drums light — A#. Level 0.62. Third and hardest drop: the same red-in-blue frame, brightest of the three (0.80). This is the section with the four hardest kicks on the record.",
+      "id": "s15",
+      "section": 3,
+      "from_s": 81.77,
+      "to_s": 89.75,
+      "at": {
+        "bar": 39,
+        "beat": 1,
+        "beats": 15
+      },
+      "colours": [
+        "#e01313",
+        "#2f5bff"
+      ]
+    },
+    {
+      "effect": "drive",
+      "colours": [
+        "#e01313",
+        "#2f5bff"
+      ],
+      "floor": 0.8,
+      "peak": 1,
+      "why": "chorus, resolving, drums full — C. Level 0.81. Third and hardest drop: the same red-in-blue frame, brightest of the three (0.80). This is the section with the four hardest kicks on the record.",
+      "id": "s16",
+      "section": 3,
+      "from_s": 89.75,
+      "to_s": 91.76,
+      "at": {
+        "bar": 43,
+        "beat": 1,
+        "beats": 12
+      }
+    },
+    {
+      "effect": "pulse",
+      "amount": 0.45,
+      "colour": "#ff8a1a",
+      "extent": "all",
+      "why": "outro, sustaining, drums none — G. Level 0.34. Moving, not held: the room sat on one unchanging picture here for nearly three seconds. AMBER, the fourth colour, appearing for the first time here: the song resolves and warmth reads as release after ninety seconds of blue and red.",
+      "id": "s21",
+      "section": 5,
+      "from_s": 109.76,
+      "to_s": 117.77,
+      "at": {
+        "bar": 53,
+        "beat": 1,
+        "beats": 16
+      },
+      "floor": 0.16,
+      "peak": 0.9,
+      "head": false
+    },
+    {
+      "effect": "pulse",
+      "amount": 0.4,
+      "colour": "#ff8a1a",
+      "extent": "all",
+      "why": "outro, sustaining, drums none — D:min. Level 0.34. A wash holds one picture by definition, and eight seconds of one picture is eight seconds of nothing happening. pulse keeps the room alive at the same level. AMBER, the fourth colour, appearing for the first time here: the song resolves and warmth reads as release after ninety seconds of blue and red.",
+      "id": "s22",
+      "section": 5,
+      "from_s": 117.77,
+      "to_s": 123.77,
+      "at": {
+        "bar": 57,
+        "beat": 1,
+        "beats": 12
+      },
+      "floor": 0.18,
+      "peak": 0.85,
+      "head": false
+    },
+    {
+      "effect": "drone",
+      "amount": 0.23,
+      "colour": "#ff8a1a",
+      "extent": "all",
+      "why": "outro, easing, drums none — D. Level 0.34. AMBER, the fourth colour, appearing for the first time here: the song resolves and warmth reads as release after ninety seconds of blue and red.",
+      "id": "s23",
+      "section": 5,
+      "from_s": 123.77,
+      "to_s": 127.61,
+      "at": {
+        "bar": 60,
+        "beat": 1,
+        "beats": 7
+      },
+      "head": false
+    },
+    {
+      "effect": "drone",
+      "amount": 0.173,
+      "colour": "#ff8a1a",
+      "extent": "all",
+      "why": "outro, developing, drums none — E:7. Level 0.23. AMBER, the fourth colour, appearing for the first time here: the song resolves and warmth reads as release after ninety seconds of blue and red.",
+      "id": "s24",
+      "section": 5,
+      "from_s": 127.61,
+      "to_s": 128.28,
+      "at": {
+        "bar": 62,
+        "beat": 1,
+        "beats": 1
+      },
+      "head": false
+    },
+    {
+      "effect": "drone",
+      "amount": 0.173,
+      "colour": "#ff8a1a",
+      "extent": "all",
+      "why": "outro, developing, drums none — E:7. Level 0.23. AMBER, the fourth colour, appearing for the first time here: the song resolves and warmth reads as release after ninety seconds of blue and red.",
+      "id": "s25",
+      "section": 6,
+      "from_s": 128.28,
+      "to_s": 131.286,
+      "at": {
+        "bar": 62,
+        "beat": 2,
+        "beats": 6
+      },
+      "head": false
+    },
+    {
+      "effect": "drone",
+      "section": 0,
+      "from_s": 0,
+      "to_s": 9.11,
+      "amount": 0.14,
+      "colour": "#2f5bff",
+      "extent": "outer",
+      "fade_ms": 400,
+      "why": "Voice and almost nothing else. The outer pair holds a very low blue bed; the inner pair is not here -- it belongs to the singer (see the binding). The head is a still white pin. Nothing moves that the song has not moved.",
+      "head": false
+    },
+    {
+      "effect": "drone",
+      "section": 0,
+      "from_s": 9.11,
+      "to_s": 17.75,
+      "amount": 0.22,
+      "colour": "#2f5bff",
+      "extent": "all",
+      "fade_ms": 600,
+      "why": "9.11s, the score's 'drums thicken' moment: the whole row comes into the bed, a little brighter. Still blue, still still.",
+      "head": false
+    },
+    {
+      "effect": "pulse",
+      "section": 0,
+      "from_s": 17.75,
+      "to_s": 25.56,
+      "amount": 0.3,
+      "colour": "#2f5bff",
+      "extent": "all",
+      "floor": 0.14,
+      "peak": 0.7,
+      "why": "17.75s: the tempo lifts from 89 to 119 and the song starts to walk. The room starts to walk with it -- a slow blue pulse on the new beat. The first rhythm the row has shown.",
+      "head": false
+    },
+    {
+      "effect": "drone",
+      "section": 1,
+      "from_s": 25.56,
+      "to_s": 33.75,
+      "amount": 0.16,
+      "colour": "#2f5bff",
+      "extent": "inner",
+      "fade_ms": 600,
+      "why": "The voice at its loudest before the riff: the OUTER pair now follows it (binding) and the inner pair holds low, the reverse of the opening -- the same idea, turned round, so the section reads as new without spending anything.",
+      "head": false
+    },
+    {
+      "effect": "drone",
+      "section": 2,
+      "from_s": 73.76,
+      "to_s": 81.76,
+      "amount": 0.12,
+      "colour": "#2f5bff",
+      "extent": "all",
+      "head": false,
+      "why": "A low blue bed under the exchange; the picture here is the binding."
+    },
+    {
+      "effect": "drive",
+      "section": 4,
+      "from_s": 97.76,
+      "to_s": 109.76,
+      "floor": 0.8,
+      "peak": 1,
+      "extent": "all",
+      "head": false,
+      "why": "The loudest twelve seconds on the record: the two pairs call and respond on EVERY beat, red and WHITE. White is a hit, and here the song hits on every beat, so the row does -- which makes this both the brightest and the busiest stretch of the show, where it belongs. The head is white with the prism; the four hardest kicks get a white strobe on top.",
+      "colours": [
+        "#e01313",
+        "#ffffff"
+      ]
+    },
+    {
+      "effect": "drone",
+      "section": 3,
+      "from_s": 91.76,
+      "to_s": 97.76,
+      "amount": 0.16,
+      "colour": "#2f5bff",
+      "extent": "all",
+      "head": false,
+      "why": "A quiet blue bed under the colour wave and nothing else. The wave had been sitting on the drop's red/blue frame and the two blended into a grey near-white -- the brightest thing in the show by accident, and the travel unreadable. A wave needs a still field to cross."
+    },
+    {
+      "effect": "drive",
+      "colours": [
+        "#2f5bff",
+        "#2f5bff"
+      ],
+      "extent": "all",
+      "floor": 0.66,
+      "peak": 1,
+      "why": "Bars 26-28: the bass drops out and the singer leads. The room turns blue and the pairs swap at half speed -- the same drive, but wider and calmer, so the singer has the floor. Red comes back only as the runs on beat 4.",
+      "id": "s11",
+      "section": 2,
+      "from_s": 55.76,
+      "to_s": 61.76,
+      "at": {
+        "bar": 26,
+        "beat": 1,
+        "beats": 12
+      },
+      "every_beats": 2
+    },
+    {
+      "effect": "drive",
+      "colours": [
+        "#e01313",
+        "#2f5bff"
+      ],
+      "extent": "all",
+      "floor": 0.8,
+      "peak": 1,
+      "why": "Bar 29: bass and drums return, hardest in the section. Red home again, floor higher than the arrival, straight into the bar-30 acceleration.",
+      "id": "s11",
+      "section": 2,
+      "from_s": 61.76,
+      "to_s": 63.76,
+      "at": {
+        "bar": 29,
+        "beat": 1,
+        "beats": 4
+      }
+    }
   ],
-  "refit": {
-   "tolerance_s": 0.03,
-   "segments": 24,
-   "mean_err_ms": 9.4,
-   "max_err_ms": 29.6,
-   "note": "beat 0 is the first FLAGGED downbeat; beats before it are the pickup in bar 0"
-  },
-  "pickup": {
-   "count": 2,
-   "before_bar_1": [
-    0.37,
-    1.03
-   ]
-  }
- },
- "built_from": "the whole protocol response: both segmentations, layers.subsection, layers.presence, chords, energy, moments, rhythm",
- "states": [
-  {
-   "effect": "wash",
-   "amount": 0.14,
-   "colour": "#2f5bff",
-   "extent": "all",
-   "why": "The bed under the build: the whole row held on in dim blue, so the runs and the head have a cold field to cut through rather than a black one. Level 0.14 -- present, not seen.",
-   "id": "s8",
-   "section": 1,
-   "from_s": 41.75,
-   "to_s": 47.74,
-   "at": {
-    "bar": 19,
-    "beat": 1,
-    "beats": 12
-   }
-  },
-  {
-   "effect": "wash",
-   "amount": 0.14,
-   "colour": "#2f5bff",
-   "extent": "all",
-   "why": "The bed under the build: the whole row held on in dim blue, so the runs and the head have a cold field to cut through rather than a black one. Level 0.14 -- present, not seen.",
-   "id": "s9",
-   "section": 1,
-   "from_s": 47.74,
-   "to_s": 48.24,
-   "at": {
-    "bar": 22,
-    "beat": 1,
-    "beats": 1
-   }
-  },
-  {
-   "effect": "wash",
-   "amount": 0.14,
-   "colour": "#2f5bff",
-   "extent": "all",
-   "why": "The bed under the build: the whole row held on in dim blue, so the runs and the head have a cold field to cut through rather than a black one. Level 0.14 -- present, not seen.",
-   "id": "s10",
-   "section": 2,
-   "from_s": 48.24,
-   "to_s": 49.75,
-   "at": {
-    "bar": 22,
-    "beat": 1,
-    "beats": 7
-   }
-  },
-  {
-   "effect": "drive",
-   "extent": "all",
-   "why": "From the downbeat of the drop: a red core in a blue frame -- drive's two pairs call and respond, inner red, outer blue, flipping on the beat. The first red the room has seen. (Split from the state that straddled 49.75, whose first bar was sitting on the dim build bed.) Floor 0.72 so the frame is brighter than the build it answers.",
-   "id": "s10",
-   "section": 2,
-   "from_s": 49.75,
-   "to_s": 51.76,
-   "at": {
-    "bar": 22,
-    "beat": 1,
-    "beats": 7
-   },
-   "colours": [
-    "#e01313",
-    "#2f5bff"
-   ],
-   "floor": 0.72,
-   "peak": 1.0
-  },
-  {
-   "effect": "drive",
-   "colours": [
-    "#e01313",
-    "#2f5bff"
-   ],
-   "extent": "all",
-   "floor": 0.72,
-   "peak": 1.0,
-   "why": "A red core in a blue frame: drive's two pairs call and respond, inner in red and outer in blue, flipping on the beat. The room keeps moving through the drop without a chase on top, and this is the first red the room has seen. Floor 0.72 so the frame is brighter than the build it answers.",
-   "id": "s11",
-   "section": 2,
-   "from_s": 51.76,
-   "to_s": 63.76,
-   "at": {
-    "bar": 24,
-    "beat": 1,
-    "beats": 23
-   }
-  },
-  {
-   "effect": "drive",
-   "extent": "all",
-   "floor": 0.76,
-   "peak": 1.0,
-   "why": "chorus, intensifying, drums full \u2014 A:min. Level 0.70. Floor lifted so the drop beats its own build: eight bars of the row blazing and collapsing is a big picture, and the payoff cannot be smaller than the run-up. Second drop: the same red-in-blue frame as the first, one step brighter (0.76 against 0.72). Three drops in this song and each has to be bigger than the last, or the second reads as the show losing interest.",
-   "id": "s12",
-   "section": 2,
-   "from_s": 63.76,
-   "to_s": 71.76,
-   "at": {
-    "bar": 30,
-    "beat": 1,
-    "beats": 16
-   },
-   "colours": [
-    "#e01313",
-    "#2f5bff"
-   ]
-  },
-  {
-   "effect": "drive",
-   "extent": "all",
-   "floor": 0.76,
-   "peak": 1.0,
-   "why": "chorus, resolving, drums light \u2014 A#. Level 0.62. Second drop: the same red-in-blue frame as the first, one step brighter (0.76 against 0.72). Three drops in this song and each has to be bigger than the last, or the second reads as the show losing interest.",
-   "id": "s13",
-   "section": 2,
-   "from_s": 71.76,
-   "to_s": 73.76,
-   "at": {
-    "bar": 34,
-    "beat": 1,
-    "beats": 19
-   },
-   "colours": [
-    "#e01313",
-    "#2f5bff"
-   ]
-  },
-  {
-   "effect": "drive",
-   "extent": "all",
-   "floor": 0.8,
-   "peak": 1.0,
-   "why": "chorus, developing, drums light \u2014 A#. Level 0.62. Third and hardest drop: the same red-in-blue frame, brightest of the three (0.80). This is the section with the four hardest kicks on the record.",
-   "id": "s15",
-   "section": 3,
-   "from_s": 81.77,
-   "to_s": 89.75,
-   "at": {
-    "bar": 39,
-    "beat": 1,
-    "beats": 15
-   },
-   "colours": [
-    "#e01313",
-    "#2f5bff"
-   ]
-  },
-  {
-   "effect": "drive",
-   "colours": [
-    "#e01313",
-    "#2f5bff"
-   ],
-   "floor": 0.8,
-   "peak": 1.0,
-   "why": "chorus, resolving, drums full \u2014 C. Level 0.81. Third and hardest drop: the same red-in-blue frame, brightest of the three (0.80). This is the section with the four hardest kicks on the record.",
-   "id": "s16",
-   "section": 3,
-   "from_s": 89.75,
-   "to_s": 91.76,
-   "at": {
-    "bar": 43,
-    "beat": 1,
-    "beats": 12
-   }
-  },
-  {
-   "effect": "pulse",
-   "amount": 0.45,
-   "colour": "#ff8a1a",
-   "extent": "all",
-   "why": "outro, sustaining, drums none \u2014 G. Level 0.34. Moving, not held: the room sat on one unchanging picture here for nearly three seconds. AMBER, the fourth colour, appearing for the first time here: the song resolves and warmth reads as release after ninety seconds of blue and red.",
-   "id": "s21",
-   "section": 5,
-   "from_s": 109.76,
-   "to_s": 117.77,
-   "at": {
-    "bar": 53,
-    "beat": 1,
-    "beats": 16
-   },
-   "floor": 0.16,
-   "peak": 0.9,
-   "head": false
-  },
-  {
-   "effect": "pulse",
-   "amount": 0.4,
-   "colour": "#ff8a1a",
-   "extent": "all",
-   "why": "outro, sustaining, drums none \u2014 D:min. Level 0.34. A wash holds one picture by definition, and eight seconds of one picture is eight seconds of nothing happening. pulse keeps the room alive at the same level. AMBER, the fourth colour, appearing for the first time here: the song resolves and warmth reads as release after ninety seconds of blue and red.",
-   "id": "s22",
-   "section": 5,
-   "from_s": 117.77,
-   "to_s": 123.77,
-   "at": {
-    "bar": 57,
-    "beat": 1,
-    "beats": 12
-   },
-   "floor": 0.18,
-   "peak": 0.85,
-   "head": false
-  },
-  {
-   "effect": "drone",
-   "amount": 0.23,
-   "colour": "#ff8a1a",
-   "extent": "all",
-   "why": "outro, easing, drums none \u2014 D. Level 0.34. AMBER, the fourth colour, appearing for the first time here: the song resolves and warmth reads as release after ninety seconds of blue and red.",
-   "id": "s23",
-   "section": 5,
-   "from_s": 123.77,
-   "to_s": 127.61,
-   "at": {
-    "bar": 60,
-    "beat": 1,
-    "beats": 7
-   },
-   "head": false
-  },
-  {
-   "effect": "drone",
-   "amount": 0.173,
-   "colour": "#ff8a1a",
-   "extent": "all",
-   "why": "outro, developing, drums none \u2014 E:7. Level 0.23. AMBER, the fourth colour, appearing for the first time here: the song resolves and warmth reads as release after ninety seconds of blue and red.",
-   "id": "s24",
-   "section": 5,
-   "from_s": 127.61,
-   "to_s": 128.28,
-   "at": {
-    "bar": 62,
-    "beat": 1,
-    "beats": 1
-   },
-   "head": false
-  },
-  {
-   "effect": "drone",
-   "amount": 0.173,
-   "colour": "#ff8a1a",
-   "extent": "all",
-   "why": "outro, developing, drums none \u2014 E:7. Level 0.23. AMBER, the fourth colour, appearing for the first time here: the song resolves and warmth reads as release after ninety seconds of blue and red.",
-   "id": "s25",
-   "section": 6,
-   "from_s": 128.28,
-   "to_s": 131.286,
-   "at": {
-    "bar": 62,
-    "beat": 2,
-    "beats": 6
-   },
-   "head": false
-  },
-  {
-   "effect": "drone",
-   "section": 0,
-   "from_s": 0.0,
-   "to_s": 9.11,
-   "amount": 0.14,
-   "colour": "#2f5bff",
-   "extent": "outer",
-   "fade_ms": 400,
-   "why": "Voice and almost nothing else. The outer pair holds a very low blue bed; the inner pair is not here -- it belongs to the singer (see the binding). The head is a still white pin. Nothing moves that the song has not moved.",
-   "head": false
-  },
-  {
-   "effect": "drone",
-   "section": 0,
-   "from_s": 9.11,
-   "to_s": 17.75,
-   "amount": 0.22,
-   "colour": "#2f5bff",
-   "extent": "all",
-   "fade_ms": 600,
-   "why": "9.11s, the score's 'drums thicken' moment: the whole row comes into the bed, a little brighter. Still blue, still still.",
-   "head": false
-  },
-  {
-   "effect": "pulse",
-   "section": 0,
-   "from_s": 17.75,
-   "to_s": 25.56,
-   "amount": 0.3,
-   "colour": "#2f5bff",
-   "extent": "all",
-   "floor": 0.14,
-   "peak": 0.7,
-   "why": "17.75s: the tempo lifts from 89 to 119 and the song starts to walk. The room starts to walk with it -- a slow blue pulse on the new beat. The first rhythm the row has shown.",
-   "head": false
-  },
-  {
-   "effect": "drone",
-   "section": 1,
-   "from_s": 25.56,
-   "to_s": 33.75,
-   "amount": 0.16,
-   "colour": "#2f5bff",
-   "extent": "inner",
-   "fade_ms": 600,
-   "why": "The voice at its loudest before the riff: the OUTER pair now follows it (binding) and the inner pair holds low, the reverse of the opening -- the same idea, turned round, so the section reads as new without spending anything.",
-   "head": false
-  },
-  {
-   "effect": "drone",
-   "section": 2,
-   "from_s": 73.76,
-   "to_s": 81.76,
-   "amount": 0.12,
-   "colour": "#2f5bff",
-   "extent": "all",
-   "head": false,
-   "why": "A low blue bed under the exchange; the picture here is the binding."
-  },
-  {
-   "effect": "drive",
-   "section": 4,
-   "from_s": 97.76,
-   "to_s": 109.76,
-   "floor": 0.8,
-   "peak": 1.0,
-   "extent": "all",
-   "head": false,
-   "why": "The loudest twelve seconds on the record: the two pairs call and respond on EVERY beat, red and WHITE. White is a hit, and here the song hits on every beat, so the row does -- which makes this both the brightest and the busiest stretch of the show, where it belongs. The head is white with the prism; the four hardest kicks get a white strobe on top.",
-   "colours": [
-    "#e01313",
-    "#ffffff"
-   ]
-  },
-  {
-   "effect": "drone",
-   "section": 3,
-   "from_s": 91.76,
-   "to_s": 97.76,
-   "amount": 0.16,
-   "colour": "#2f5bff",
-   "extent": "all",
-   "head": false,
-   "why": "A quiet blue bed under the colour wave and nothing else. The wave had been sitting on the drop's red/blue frame and the two blended into a grey near-white -- the brightest thing in the show by accident, and the travel unreadable. A wave needs a still field to cross."
-  }
- ],
- "bindings": [
-  {
-   "effect": "accent",
-   "threshold": 0.28,
-   "extent": "all",
-   "rest": 0.3,
-   "for_beats": 1,
-   "why": "the hardest span in the song \u2014 here the drums themselves are the light",
-   "id": "b3",
-   "section": 4,
-   "from_s": 103.76,
-   "to_s": 109.64,
-   "at": {
-    "bar": 50,
-    "beat": 1,
-    "beats": 11
-   },
-   "colour": "#e01313",
-   "bed_colour": "#e01313"
-  },
-  {
-   "effect": "accent",
-   "threshold": 0.28,
-   "extent": "all",
-   "rest": 0.3,
-   "for_beats": 1,
-   "why": "the hardest span in the song \u2014 here the drums themselves are the light",
-   "id": "b4",
-   "section": 5,
-   "from_s": 109.64,
-   "to_s": 109.76,
-   "at": {
-    "bar": 52,
-    "beat": 4,
-    "beats": 1
-   },
-   "colour": "#e01313",
-   "bed_colour": "#e01313"
-  },
-  {
-   "effect": "follow",
-   "section": 0,
-   "from_s": 0.0,
-   "to_s": 17.75,
-   "stream": "vocal",
-   "depth": 0.9,
-   "smooth": 0.25,
-   "extent": "inner",
-   "colour": "#2f5bff",
-   "why": "The inner pair breathes with the SINGER: every sung phrase swells the two middle lamps, in blue, and they fall away between phrases. The room is doing what the voice is doing, which is the difference between quiet and bland.",
-   "head": false
-  },
-  {
-   "effect": "follow",
-   "section": 1,
-   "from_s": 25.56,
-   "to_s": 32.7,
-   "stream": "vocal",
-   "depth": 0.9,
-   "smooth": 0.25,
-   "extent": "outer",
-   "colour": "#2f5bff",
-   "why": "Before the riff the voice is at its loudest, so the OUTER pair follows it now -- the opening's figure turned round.",
-   "head": false
-  },
-  {
-   "effect": "split",
-   "section": 2,
-   "from_s": 73.76,
-   "to_s": 81.76,
-   "streams": [
-    "lead-vocal",
-    "back-vocal"
-   ],
-   "colours": [
-    "#2f5bff",
-    "#e01313"
-   ],
-   "head": false,
-   "why": "THE TWO HALVES ARGUING. This is where the song is a call and response between the lead voice and the answering voices, so the left pair follows the lead in blue and the right pair follows the answer in red -- the room literally takes sides. New picture for a new section, and the only place it is used."
-  }
- ],
- "gestures": [
-  {
-   "effect": "beam",
-   "pattern": "hold",
-   "pan": 0.3,
-   "tilt": 0.38,
-   "colour": "#ffffff",
-   "amount": 0.35,
-   "prism": 0,
-   "strobe": 0,
-   "fade_ms": 0,
-   "from_s": 0.0,
-   "to_s": 13.83,
-   "why": "The head is a still white pin on the left wall, low, for the whole opening. It does not move. Its first movement will be an event because of these fourteen seconds."
-  },
-  {
-   "effect": "glare",
-   "colour": "#ffffff",
-   "amount": 0.9,
-   "extent": "all",
-   "head": false,
-   "for_beats": 1,
-   "fade_ms": 0,
-   "at_s": 13.83,
-   "why": "13.83s: synth and backing voices enter -- the strongest moment in the intro. One beat of white across the row, the first hit of the show."
-  },
-  {
-   "effect": "beam",
-   "pattern": "hold",
-   "pan": 0.72,
-   "tilt": 0.44,
-   "colour": "#ffffff",
-   "amount": 0.4,
-   "prism": 0,
-   "strobe": 0,
-   "fade_ms": 0,
-   "from_s": 13.83,
-   "to_s": 25.56,
-   "why": "And the head's FIRST movement: one glide from the left wall to the right, on the entrance, then still again. One move in half a minute, so it is seen."
-  },
-  {
-   "at_s": 17.75,
-   "effect": "gear",
-   "from": 1,
-   "to": 2,
-   "why": "17.8s \u2014 tempo moves 89 to 119 bpm",
-   "id": "g3",
-   "at": {
-    "bar": 7,
-    "beat": 1,
-    "beats": 2
-   },
-   "start_s": 17.75,
-   "head": false
-  },
-  {
-   "at_s": 21.8,
-   "effect": "isolate",
-   "which": 2,
-   "colour": "#ffffff",
-   "rest": 0,
-   "why": "21.8s \u2014 everything drops back behind lead-vocal",
-   "id": "g5",
-   "at": {
-    "bar": 9,
-    "beat": 1,
-    "beats": 2
-   },
-   "start_s": 21.8,
-   "head": false
-  },
-  {
-   "effect": "beam",
-   "pattern": "hold",
-   "pan": 0.72,
-   "tilt": 0.44,
-   "colour": "#ffffff",
-   "amount": 0.22,
-   "prism": 0,
-   "strobe": 0,
-   "fade_ms": 900,
-   "from_s": 25.56,
-   "to_s": 32.72,
-   "why": "Towards the riff the pin dims, so the black at 32.72 is arrived at rather than cut to, and the white hit at 33.75 lands in a room that had been going quiet."
-  },
-  {
-   "from_s": 32.718,
-   "to_s": 33.72,
-   "effect": "blackout",
-   "why": "two beats of nothing, so the riff has something to arrive into",
-   "id": "g7",
-   "at": {
-    "bar": 14,
-    "beat": 2,
-    "beats": 2
-   },
-   "start_s": 32.718,
-   "fade_ms": 0
-  },
-  {
-   "from_s": 33,
-   "to_s": 33.72,
-   "effect": "hush",
-   "depth": 0.12,
-   "keep": "inner",
-   "for_beats": 2,
-   "why": "33.0s \u2014 the track falls away, so the room does too",
-   "id": "g8",
-   "at": {
-    "bar": 14,
-    "beat": 3,
-    "beats": 1
-   },
-   "start_s": 33
-  },
-  {
-   "effect": "beam",
-   "pattern": "stations",
-   "colour": "#ffffff",
-   "amount": 0.9,
-   "prism": 0,
-   "strobe": 12,
-   "from_s": 33.75,
-   "to_s": 41.75,
-   "why": "THE BASS RIFF. Bass and strings, no drums, no voice: the one fixture that can point becomes the soloist. Clean white beam, no prism, snapping to a new wall on every downbeat -- four bars, four places -- and drifting across each bar with the bass. The row stays a dim blue field underneath so the beam cuts. Now: it NODS hard and FLASHES on beats 2 and 2-and-a-half, where the riff punches, from the very first bar -- and each turn to a new wall begins a beat early so the head arrives on the downbeat instead of leaving on it.",
-   "fade_ms": 0,
-   "accents": [
-    2,
-    2.5
-   ],
-   "strobe_on": "accent"
-  },
-  {
-   "effect": "glare",
-   "colour": "#ffffff",
-   "amount": 1.0,
-   "extent": "all",
-   "head": false,
-   "for_beats": 1,
-   "fade_ms": 0,
-   "at_s": 33.75,
-   "why": "33.75s: bass and strings arrive together out of a one-second black. ONE beat of the whole row in white -- the row's single big statement in this phrase -- and then it drops to the blue bed and the head takes over. This was the biggest arrival in the first half of the song and it had been getting a dim bed fading in."
-  },
-  {
-   "effect": "trade",
-   "travel": true,
-   "direction": "lr",
-   "runs": 1,
-   "rest": 0.3,
-   "peak": 1.0,
-   "colours": [
-    "#ff1616",
-    "#2f5bff"
-   ],
-   "for_beats": 1,
-   "fade_ms": 0,
-   "from_s": 34.252,
-   "to_s": 34.504,
-   "why": "Bar 15: the red spark leaves on beat 2 and ARRIVES on the 'and' of 2 -- which is where this riff actually punches, every bar. A run is read when it lands, not when it starts, so it is aimed to land on the hit and takes a quarter of a second, not a whole beat. Left to right.",
-   "head": false
-  },
-  {
-   "effect": "trade",
-   "travel": true,
-   "direction": "rl",
-   "runs": 1,
-   "rest": 0.3,
-   "peak": 1.0,
-   "colours": [
-    "#ff1616",
-    "#3b5bff"
-   ],
-   "for_beats": 1,
-   "fade_ms": 0,
-   "from_s": 36.26,
-   "to_s": 36.51,
-   "why": "Bar 16: the red spark leaves on beat 2 and ARRIVES on the 'and' of 2 -- which is where this riff actually punches, every bar. A run is read when it lands, not when it starts, so it is aimed to land on the hit and takes a quarter of a second, not a whole beat. Right to left.",
-   "head": false
-  },
-  {
-   "effect": "trade",
-   "travel": true,
-   "direction": "lr",
-   "runs": 1,
-   "rest": 0.3,
-   "peak": 1.0,
-   "colours": [
-    "#ff1616",
-    "#485dff"
-   ],
-   "for_beats": 1,
-   "fade_ms": 0,
-   "from_s": 38.26,
-   "to_s": 38.51,
-   "why": "Bar 17: the red spark leaves on beat 2 and ARRIVES on the 'and' of 2 -- which is where this riff actually punches, every bar. A run is read when it lands, not when it starts, so it is aimed to land on the hit and takes a quarter of a second, not a whole beat. Left to right.",
-   "head": false
-  },
-  {
-   "effect": "glare",
-   "colour": "#565dff",
-   "amount": 0.6,
-   "extent": "all",
-   "for_beats": 1,
-   "fade_ms": 0,
-   "at_s": 39.76,
-   "why": "Bar 18: the borrowed major turns MINOR at 40.0s. One beat of the whole row lifting in blue-violet on the downbeat, the first time the row has spoken at full since the riff began. The head snaps at the same instant.",
-   "head": false
-  },
-  {
-   "effect": "trade",
-   "travel": true,
-   "direction": "rl",
-   "runs": 1,
-   "rest": 0.3,
-   "peak": 1.0,
-   "colours": [
-    "#ff1616",
-    "#565dff"
-   ],
-   "for_beats": 1,
-   "fade_ms": 0,
-   "from_s": 40.258,
-   "to_s": 40.506,
-   "why": "Bar 18: the red spark leaves on beat 2 and ARRIVES on the 'and' of 2 -- which is where this riff actually punches, every bar. A run is read when it lands, not when it starts, so it is aimed to land on the hit and takes a quarter of a second, not a whole beat. Right to left.",
-   "head": false
-  },
-  {
-   "effect": "beam",
-   "pattern": "stations",
-   "colour": "#ffffff",
-   "amount": 1.0,
-   "prism": 0,
-   "strobe": 12,
-   "strobe_on": "accent",
-   "from_s": 41.75,
-   "to_s": 48.24,
-   "why": "Second phrase, drums creeping in: the head keeps its stations but now STROBES on every downbeat -- the first strobe of the show, white, a burst at the top of each bar. Rhythm from the fixture that can do it. Now: it NODS hard and FLASHES on beats 2 and 2-and-a-half, where the riff punches, from the very first bar -- and each turn to a new wall begins a beat early so the head arrives on the downbeat instead of leaving on it.",
-   "fade_ms": 0,
-   "accents": [
-    2,
-    2.5
-   ]
-  },
-  {
-   "effect": "glare",
-   "colour": "#2f5bff",
-   "amount": 0.62,
-   "extent": "all",
-   "for_beats": 2,
-   "fade_ms": 0,
-   "from_s": 41.75,
-   "to_s": 42.754999999999995,
-   "why": "Bar 19, beats 1-2: the whole row BLAZES for two beats Blue, not violet: the second phrase had drifted to purple and lost the red entirely, so the half that was meant to escalate went from three colours to one dim one. The bed stays blue; the red grows in what moves.",
-   "head": false
-  },
-  {
-   "effect": "chase",
-   "direction": "rl",
-   "per_beat": 1,
-   "colour": "#e01313",
-   "amount": 1.0,
-   "rest": 0.0,
-   "extent": "all",
-   "for_beats": 1,
-   "fade_ms": 0,
-   "from_s": 42.754999999999995,
-   "to_s": 43.2575,
-   "why": "Beat 3: the row collapses to ONE lamp running right to left in a single beat, everything else dark. In RED -- the spark's colour. In phrase one the red was a quarter-second spark once a bar; here it is a whole running lamp, twice a bar. Same identity, more of it.",
-   "head": false
-  },
-  {
-   "effect": "chase",
-   "direction": "lr",
-   "per_beat": 1,
-   "colour": "#e01313",
-   "amount": 1.0,
-   "rest": 0.0,
-   "extent": "all",
-   "for_beats": 1,
-   "fade_ms": 0,
-   "from_s": 43.2575,
-   "to_s": 43.76,
-   "why": "Beat 4: and straight back the other way. In RED -- the spark's colour. In phrase one the red was a quarter-second spark once a bar; here it is a whole running lamp, twice a bar. Same identity, more of it.",
-   "head": false
-  },
-  {
-   "effect": "glare",
-   "colour": "#2f5bff",
-   "amount": 0.76,
-   "extent": "all",
-   "for_beats": 2,
-   "fade_ms": 0,
-   "from_s": 43.76,
-   "to_s": 44.76,
-   "why": "Bar 20, beats 1-2: the whole row BLAZES for two beats Blue, not violet: the second phrase had drifted to purple and lost the red entirely, so the half that was meant to escalate went from three colours to one dim one. The bed stays blue; the red grows in what moves.",
-   "head": false
-  },
-  {
-   "effect": "chase",
-   "direction": "lr",
-   "per_beat": 1,
-   "colour": "#e01313",
-   "amount": 1.0,
-   "rest": 0.0,
-   "extent": "all",
-   "for_beats": 1,
-   "fade_ms": 0,
-   "from_s": 44.76,
-   "to_s": 45.26,
-   "why": "Beat 3: the row collapses to ONE lamp running left to right in a single beat, everything else dark. In RED -- the spark's colour. In phrase one the red was a quarter-second spark once a bar; here it is a whole running lamp, twice a bar. Same identity, more of it.",
-   "head": false
-  },
-  {
-   "effect": "chase",
-   "direction": "rl",
-   "per_beat": 1,
-   "colour": "#e01313",
-   "amount": 1.0,
-   "rest": 0.0,
-   "extent": "all",
-   "for_beats": 1,
-   "fade_ms": 0,
-   "from_s": 45.26,
-   "to_s": 45.76,
-   "why": "Beat 4: and straight back the other way. In RED -- the spark's colour. In phrase one the red was a quarter-second spark once a bar; here it is a whole running lamp, twice a bar. Same identity, more of it.",
-   "head": false
-  },
-  {
-   "effect": "glare",
-   "colour": "#2f5bff",
-   "amount": 0.9,
-   "extent": "all",
-   "for_beats": 2,
-   "fade_ms": 0,
-   "from_s": 45.76,
-   "to_s": 46.75,
-   "why": "Bar 21, beats 1-2: the whole row BLAZES for two beats Blue, not violet: the second phrase had drifted to purple and lost the red entirely, so the half that was meant to escalate went from three colours to one dim one. The bed stays blue; the red grows in what moves.",
-   "head": false
-  },
-  {
-   "effect": "chase",
-   "direction": "rl",
-   "per_beat": 1,
-   "colour": "#e01313",
-   "amount": 1.0,
-   "rest": 0.0,
-   "extent": "all",
-   "for_beats": 1,
-   "fade_ms": 0,
-   "from_s": 46.75,
-   "to_s": 47.245000000000005,
-   "why": "Beat 3: the row collapses to ONE lamp running right to left in a single beat, everything else dark. In RED -- the spark's colour. In phrase one the red was a quarter-second spark once a bar; here it is a whole running lamp, twice a bar. Same identity, more of it.",
-   "head": false
-  },
-  {
-   "effect": "chase",
-   "direction": "lr",
-   "per_beat": 1,
-   "colour": "#e01313",
-   "amount": 1.0,
-   "rest": 0.0,
-   "extent": "all",
-   "for_beats": 1,
-   "fade_ms": 0,
-   "from_s": 47.245000000000005,
-   "to_s": 47.74,
-   "why": "Beat 4: and straight back the other way. In RED -- the spark's colour. In phrase one the red was a quarter-second spark once a bar; here it is a whole running lamp, twice a bar. Same identity, more of it.",
-   "head": false
-  },
-  {
-   "effect": "glare",
-   "colour": "#2f5bff",
-   "amount": 0.85,
-   "extent": "all",
-   "for_beats": 2,
-   "fade_ms": 0,
-   "from_s": 47.74,
-   "to_s": 48.745000000000005,
-   "why": "Bar 22, the C-major lift before the drop: the row at FULL in violet -- as far toward red as the build ever gets -- for two beats. Held at 0.85, not full: the last bar of the build was the brightest two seconds in the whole show, and the drop has to be bigger than the thing that led into it. Blue, not violet: the second phrase had drifted to purple and lost the red entirely, so the half that was meant to escalate went from three colours to one dim one. The bed stays blue; the red grows in what moves.",
-   "head": false
-  },
-  {
-   "effect": "blackout",
-   "from_s": 48.745000000000005,
-   "to_s": 49.72,
-   "fade_ms": 0,
-   "why": "Then NOTHING for two beats, head included. Eight bars of the room warming and moving, and it stops dead. This silence is what makes the next beat enormous."
-  },
-  {
-   "effect": "glare",
-   "colour": "#ffffff",
-   "amount": 1.0,
-   "extent": "all",
-   "for_beats": 1,
-   "fade_ms": 0,
-   "at_s": 49.75,
-   "why": "49.75s, THE DROP. Every lamp to full WHITE for one beat, snapped, no fade. The room has been blue for fifty seconds; this is the first white and the drums arriving.",
-   "head": false
-  },
-  {
-   "effect": "beam",
-   "pattern": "snap",
-   "colour": "#e01313",
-   "amount": 1.0,
-   "prism": 100,
-   "strobe": 0,
-   "from_s": 49.75,
-   "to_s": 57.76,
-   "why": "The head goes RED with the PRISM for the first time all night: one red beam becomes six red rays, snapping wall to wall on every beat over a row that is now red and blue. The prism was withheld for fifty seconds so that this reads as an arrival. The prism PULSES on the front of every beat rather than sitting on, the tilt kicks on every beat, and each turn leaves a beat early so it lands on the beat.",
-   "fade_ms": 0,
-   "accents": [
-    1,
-    2,
-    3,
-    4
-   ],
-   "prism_on": "beat",
-   "anticipate": true
-  },
-  {
-   "effect": "glare",
-   "colour": "#ffffff",
-   "extent": "all",
-   "for_beats": 1,
-   "fade_ms": 0,
-   "at_s": 52.76,
-   "why": "52.76s: the whole band at full strength, six families at once. One full BEAT of white across the row, held, not an 80ms flash -- the head keeps snapping red underneath it.",
-   "amount": 1.0,
-   "head": false
-  },
-  {
-   "effect": "anticipation",
-   "colour": "#ffffff",
-   "intensity": 1.0,
-   "for_beats": 3,
-   "head": false,
-   "fade_ms": 0,
-   "from_s": 63.76,
-   "to_s": 65.25,
-   "why": "BAR 30. The drums fall out completely across this bar (kick 0.47 -> 0.04 -> 0.00) before the second drop. White flashes take their place: quick, seemingly random, accelerating across the row for three beats -- the transition move. The 240ms hole at 64.20 stays as a stutter inside them."
-  },
-  {
-   "effect": "beam",
-   "pattern": "hold",
-   "pan": 0.5,
-   "tilt": 0.4,
-   "colour": "#ffffff",
-   "amount": 1.0,
-   "prism": 0,
-   "strobe": 14,
-   "strobe_on": "beat",
-   "fade_ms": 0,
-   "from_s": 63.76,
-   "to_s": 65.25,
-   "why": "The head joins the acceleration: dead centre, white, no prism, strobing on every beat -- the first time the head has flashed white since the riff. Then the beat of black at 65.25, then red."
-  },
-  {
-   "effect": "blackout",
-   "from_s": 64.2,
-   "to_s": 64.44,
-   "why": "A genuine 200ms hole at 64.2s: the band falls to under half its own level right here, just before the drums come back full. Black for exactly as long as the hole, so the room breathes with the track instead of over it.",
-   "fade_ms": 0
-  },
-  {
-   "effect": "blackout",
-   "why": "One beat of nothing before the drums come back full at bar 31.",
-   "from_s": 65.25,
-   "to_s": 65.75,
-   "at": {
-    "bar": 30,
-    "beat": 4
-   },
-   "fade_ms": 0
-  },
-  {
-   "effect": "impact",
-   "colour": "#ffffff",
-   "extent": "all",
-   "for_beats": 2,
-   "why": "Bar 31 lands. The build was kept cold on purpose so this is the first white the room sees.",
-   "at_s": 65.75,
-   "at": {
-    "bar": 31,
-    "beat": 1
-   },
-   "fade_ms": 0
-  },
-  {
-   "at_s": 72.25,
-   "effect": "lift",
-   "by": 0.35,
-   "over_beats": 8,
-   "tilt": 0.4,
-   "why": "72.3s \u2014 lead-vocal enters",
-   "id": "g24",
-   "at": {
-    "bar": 34,
-    "beat": 1,
-    "beats": 8
-   },
-   "start_s": 72.25
-  },
-  {
-   "effect": "beam",
-   "pattern": "hold",
-   "pan": 0.5,
-   "tilt": 0.42,
-   "colour": "#ffffff",
-   "amount": 0.3,
-   "prism": 0,
-   "strobe": 0,
-   "fade_ms": 600,
-   "from_s": 73.76,
-   "to_s": 81.76,
-   "why": "The head rests -- a low still white pin -- through the exchange, so its return at the third drop lands as a return."
-  },
-  {
-   "effect": "blackout",
-   "from_s": 80.1,
-   "to_s": 80.38,
-   "why": "The same thing at 80.1s, 250ms, on the approach to the next drop.",
-   "fade_ms": 0
-  },
-  {
-   "effect": "blackout",
-   "why": "One beat of nothing before bar 40, the hardest span in the song.",
-   "from_s": 83.25,
-   "to_s": 83.75,
-   "at": {
-    "bar": 39,
-    "beat": 4
-   },
-   "fade_ms": 0
-  },
-  {
-   "effect": "impact",
-   "colour": "#ffffff",
-   "extent": "all",
-   "for_beats": 2,
-   "why": "Bar 40 lands. The build was kept cold on purpose so this is the first white the room sees.",
-   "at_s": 83.75,
-   "at": {
-    "bar": 40,
-    "beat": 1
-   },
-   "fade_ms": 0
-  },
-  {
-   "effect": "beam",
-   "pattern": "snap",
-   "colour": "#e01313",
-   "amount": 1.0,
-   "prism": 100,
-   "strobe": 12,
-   "strobe_on": "beat",
-   "fade_ms": 0,
-   "from_s": 83.76,
-   "to_s": 91.76,
-   "why": "Third drop: the head's move a third time, escalated once more -- red, prism, and now strobing on EVERY beat, not just the downbeat. Same figure each drop, bigger each time, so the room learns it and then feels it grow."
-  },
-  {
-   "at_s": 85.76,
-   "effect": "impact",
-   "colour": "#ffffff",
-   "extent": "all",
-   "for_beats": 2,
-   "why": "the drums arrive at 85.76s",
-   "id": "g27",
-   "at": {
-    "bar": 41,
-    "beat": 1,
-    "beats": 2
-   },
-   "start_s": 85.76,
-   "fade_ms": 0
-  },
-  {
-   "from_s": 89.697,
-   "to_s": 90.728,
-   "effect": "anticipation",
-   "for_beats": 2,
-   "colour": "#ffffff",
-   "intensity": 1,
-   "why": "white strobes accelerating into the peak",
-   "id": "g28",
-   "at": {
-    "bar": 42,
-    "beat": 4,
-    "beats": 2
-   },
-   "start_s": 89.697,
-   "fade_ms": 0
-  },
-  {
-   "from_s": 90.728,
-   "to_s": 91.73,
-   "effect": "blackout",
-   "why": "and then two beats of nothing",
-   "id": "g29",
-   "at": {
-    "bar": 43,
-    "beat": 2,
-    "beats": 2
-   },
-   "start_s": 90.728,
-   "fade_ms": 0
-  },
-  {
-   "at_s": 91.76,
-   "effect": "impact",
-   "colour": "#ffffff",
-   "extent": "all",
-   "for_beats": 2,
-   "why": "THE PEAK at 91.76s \u2014 the loudest stretch of the song",
-   "id": "g30",
-   "at": {
-    "bar": 44,
-    "beat": 1,
-    "beats": 2
-   },
-   "start_s": 91.76,
-   "fade_ms": 0
-  },
-  {
-   "effect": "trade",
-   "travel": true,
-   "direction": "lr",
-   "runs": 2,
-   "rest": 0.62,
-   "peak": 0.85,
-   "colours": [
-    "#e01313",
-    "#2f5bff"
-   ],
-   "for_beats": 4,
-   "head": false,
-   "fade_ms": 0,
-   "from_s": 91.76,
-   "to_s": 93.76,
-   "why": "THE COLOUR WAVE as this section's identity: the row stays lit in blue and a RED position walks across it, twice a bar, turning each bar. Only the hue moves. Red over blue, not white over red: white is a hit in this show and a white wave here outshone the loudest section that follows. Peak 0.85: this is a RESOLVE, and it sits under the climax that follows, not over it."
-  },
-  {
-   "effect": "beam",
-   "pattern": "hold",
-   "pan": 0.5,
-   "tilt": 0.42,
-   "colour": "#e01313",
-   "amount": 0.35,
-   "prism": 0,
-   "strobe": 0,
-   "fade_ms": 800,
-   "from_s": 91.76,
-   "to_s": 97.76,
-   "why": "The head RESTS through the resolve -- a still red pin, low, no prism -- after eight bars of snapping. Its white explosion at 97.76 is an entrance because of these six bars, and the row's colour wave has the room to itself."
-  },
-  {
-   "effect": "trade",
-   "travel": true,
-   "direction": "rl",
-   "runs": 2,
-   "rest": 0.62,
-   "peak": 0.85,
-   "colours": [
-    "#e01313",
-    "#2f5bff"
-   ],
-   "for_beats": 4,
-   "head": false,
-   "fade_ms": 0,
-   "from_s": 93.76,
-   "to_s": 95.76,
-   "why": "THE COLOUR WAVE as this section's identity: the row stays lit in blue and a RED position walks across it, twice a bar, turning each bar. Only the hue moves. Red over blue, not white over red: white is a hit in this show and a white wave here outshone the loudest section that follows. Peak 0.85: this is a RESOLVE, and it sits under the climax that follows, not over it."
-  },
-  {
-   "effect": "trade",
-   "travel": true,
-   "direction": "lr",
-   "runs": 2,
-   "rest": 0.62,
-   "peak": 0.85,
-   "colours": [
-    "#e01313",
-    "#2f5bff"
-   ],
-   "for_beats": 4,
-   "head": false,
-   "fade_ms": 0,
-   "from_s": 95.76,
-   "to_s": 97.76,
-   "why": "THE COLOUR WAVE as this section's identity: the row stays lit in blue and a RED position walks across it, twice a bar, turning each bar. Only the hue moves. Red over blue, not white over red: white is a hit in this show and a white wave here outshone the loudest section that follows. Peak 0.85: this is a RESOLVE, and it sits under the climax that follows, not over it."
-  },
-  {
-   "effect": "beam",
-   "pattern": "snap",
-   "colour": "#ffffff",
-   "amount": 1.0,
-   "prism": 100,
-   "prism_on": "beat",
-   "strobe": 12,
-   "strobe_on": "beat",
-   "accents": [
-    1,
-    2,
-    3,
-    4
-   ],
-   "fade_ms": 0,
-   "from_s": 97.76,
-   "to_s": 109.76,
-   "why": "The head goes WHITE for the first time since the build -- prism pulsing, strobing and kicking on every beat, snapping side to side. The biggest the head gets, saved for the biggest the song gets."
-  },
-  {
-   "effect": "strobe",
-   "hz": 12,
-   "colour": "#ffffff",
-   "intensity": 1.0,
-   "extent": "all",
-   "head": false,
-   "for_beats": 2,
-   "fade_ms": 0,
-   "from_s": 98.26,
-   "to_s": 99.26,
-   "why": "A WHITE STROBE OVER A RED HOLD on one of the four hardest kicks in the song (98.50s): every 'on' is white and every 'off' is red, so the flash has a colour. Two beats."
-  },
-  {
-   "from_s": 100.728,
-   "to_s": 101.73,
-   "effect": "blackout",
-   "why": "two beats of nothing \u2014 the drums go full at 101.76s and the room must be empty first",
-   "id": "g32",
-   "at": {
-    "bar": 48,
-    "beat": 2,
-    "beats": 2
-   },
-   "start_s": 100.728,
-   "fade_ms": 0
-  },
-  {
-   "effect": "strobe",
-   "hz": 12,
-   "colour": "#ffffff",
-   "intensity": 1.0,
-   "extent": "all",
-   "head": false,
-   "for_beats": 2,
-   "fade_ms": 0,
-   "from_s": 100.76,
-   "to_s": 101.76,
-   "why": "A WHITE STROBE OVER A RED HOLD on one of the four hardest kicks in the song (100.55s): every 'on' is white and every 'off' is red, so the flash has a colour. Two beats."
-  },
-  {
-   "effect": "blackout",
-   "from_s": 101.75,
-   "to_s": 102.73,
-   "why": "Two beats of nothing before the loudest kick in the song. Everything stops -- and this is the one place in the record where the whole band is already at full, so the hole is the loudest thing in the room.",
-   "fade_ms": 0
-  },
-  {
-   "effect": "glare",
-   "colour": "#e01313",
-   "level": 1.0,
-   "extent": "all",
-   "at_s": 102.76,
-   "for_beats": 4,
-   "rise": -0.5,
-   "why": "THE LOUDEST KICK IN THE SONG at 102.76s -- full strength in the kick lane, the top of four consecutive bars that hold the four hardest hits on the record. Whole rig, full white, held for three beats. This is the peak of the show and it is placed on the hit rather than on a bar line. Four beats: this is the loudest kick in the song and the show's brightest moment lives here, not in the build.",
-   "fade_ms": 0
-  },
-  {
-   "from_s": 109.76,
-   "to_s": 111.823,
-   "effect": "strip",
-   "to": 0.1,
-   "over_beats": 4,
-   "why": "109.8s \u2014 the track strips back",
-   "id": "g34",
-   "at": {
-    "bar": 53,
-    "beat": 1,
-    "beats": 4
-   },
-   "start_s": 109.76
-  },
-  {
-   "effect": "beam",
-   "pattern": "hold",
-   "pan": 0.5,
-   "tilt": 0.44,
-   "colour": "#ff8a1a",
-   "amount": 0.35,
-   "prism": 0,
-   "strobe": 0,
-   "fade_ms": 1200,
-   "from_s": 109.76,
-   "to_s": 120.29,
-   "why": "The head rests in amber, still, through the strip-back."
-  },
-  {
-   "from_s": 113,
-   "to_s": 113.72,
-   "effect": "hush",
-   "depth": 0.12,
-   "keep": "inner",
-   "for_beats": 2,
-   "why": "113.0s \u2014 the track falls away, so the room does too",
-   "id": "g35",
-   "at": {
-    "bar": 54,
-    "beat": 3,
-    "beats": 1
-   },
-   "start_s": 113
-  },
-  {
-   "from_s": 115.29,
-   "to_s": 117.353,
-   "effect": "strip",
-   "to": 0.14,
-   "over_beats": 4,
-   "why": "115.3s \u2014 lead-vocal, tambourine and vocal drop out",
-   "id": "g36",
-   "at": {
-    "bar": 55,
-    "beat": 4,
-    "beats": 4
-   },
-   "start_s": 115.29
-  },
-  {
-   "effect": "beam",
-   "pattern": "sweep",
-   "colour": "#ff8a1a",
-   "amount": 0.6,
-   "prism": 0,
-   "strobe": 0,
-   "fade_ms": 800,
-   "from_s": 120.29,
-   "to_s": 127.6,
-   "why": "120.29s, the octave lift: the head's ONE slow sweep of the whole night, amber, across the room and back once a bar, to the end. Saved for the resolution."
-  },
-  {
-   "from_s": 121.322,
-   "to_s": 124.416,
-   "effect": "swell",
-   "colour": "#ffffff",
-   "rise": 0.8,
-   "for_beats": 6,
-   "why": "and blooms after it",
-   "id": "g38",
-   "at": {
-    "bar": 58,
-    "beat": 4,
-    "beats": 6
-   },
-   "start_s": 121.322
-  },
-  {
-   "at_s": 123.77,
-   "effect": "lift",
-   "by": 0.35,
-   "over_beats": 8,
-   "tilt": 0.4,
-   "why": "123.8s \u2014 lead-vocal and vocal enter",
-   "id": "g39",
-   "at": {
-    "bar": 60,
-    "beat": 1,
-    "beats": 8
-   },
-   "start_s": 123.77
-  },
-  {
-   "at_s": 126.71,
-   "effect": "gear",
-   "from": 1,
-   "to": 2,
-   "why": "126.7s \u2014 the beat drops away",
-   "id": "g40",
-   "at": {
-    "bar": 61,
-    "beat": 3,
-    "beats": 2
-   },
-   "start_s": 126.71
-  },
-  {
-   "at_s": 127.226,
-   "effect": "cut",
-   "for_beats": 1,
-   "why": "and one beat of nothing where the beat drops away",
-   "id": "g41",
-   "at": {
-    "bar": 61,
-    "beat": 4,
-    "beats": 1
-   },
-   "start_s": 127.226,
-   "fade_ms": 0
-  }
- ]
+  "bindings": [
+    {
+      "effect": "accent",
+      "threshold": 0.28,
+      "extent": "all",
+      "rest": 0.3,
+      "for_beats": 1,
+      "why": "the hardest span in the song — here the drums themselves are the light",
+      "id": "b3",
+      "section": 4,
+      "from_s": 103.76,
+      "to_s": 109.64,
+      "at": {
+        "bar": 50,
+        "beat": 1,
+        "beats": 11
+      },
+      "colour": "#e01313",
+      "bed_colour": "#e01313"
+    },
+    {
+      "effect": "accent",
+      "threshold": 0.28,
+      "extent": "all",
+      "rest": 0.3,
+      "for_beats": 1,
+      "why": "the hardest span in the song — here the drums themselves are the light",
+      "id": "b4",
+      "section": 5,
+      "from_s": 109.64,
+      "to_s": 109.76,
+      "at": {
+        "bar": 52,
+        "beat": 4,
+        "beats": 1
+      },
+      "colour": "#e01313",
+      "bed_colour": "#e01313"
+    },
+    {
+      "effect": "follow",
+      "section": 0,
+      "from_s": 0,
+      "to_s": 17.75,
+      "stream": "vocal",
+      "depth": 0.9,
+      "smooth": 0.25,
+      "extent": "inner",
+      "colour": "#2f5bff",
+      "why": "The inner pair breathes with the SINGER: every sung phrase swells the two middle lamps, in blue, and they fall away between phrases. The room is doing what the voice is doing, which is the difference between quiet and bland.",
+      "head": false
+    },
+    {
+      "effect": "follow",
+      "section": 1,
+      "from_s": 25.56,
+      "to_s": 32.7,
+      "stream": "vocal",
+      "depth": 0.9,
+      "smooth": 0.25,
+      "extent": "outer",
+      "colour": "#2f5bff",
+      "why": "Before the riff the voice is at its loudest, so the OUTER pair follows it now -- the opening's figure turned round.",
+      "head": false
+    },
+    {
+      "effect": "split",
+      "section": 2,
+      "from_s": 73.76,
+      "to_s": 81.76,
+      "streams": [
+        "lead-vocal",
+        "back-vocal"
+      ],
+      "colours": [
+        "#2f5bff",
+        "#e01313"
+      ],
+      "head": false,
+      "why": "THE TWO HALVES ARGUING. This is where the song is a call and response between the lead voice and the answering voices, so the left pair follows the lead in blue and the right pair follows the answer in red -- the room literally takes sides. New picture for a new section, and the only place it is used."
+    }
+  ],
+  "gestures": [
+    {
+      "effect": "beam",
+      "pattern": "hold",
+      "pan": 0.3,
+      "tilt": 0.38,
+      "colour": "#ffffff",
+      "amount": 0.35,
+      "prism": 0,
+      "strobe": 0,
+      "fade_ms": 0,
+      "from_s": 0,
+      "to_s": 13.83,
+      "why": "The head is a still white pin on the left wall, low, for the whole opening. It does not move. Its first movement will be an event because of these fourteen seconds."
+    },
+    {
+      "effect": "glare",
+      "colour": "#ffffff",
+      "amount": 0.9,
+      "extent": "all",
+      "head": false,
+      "for_beats": 1,
+      "fade_ms": 0,
+      "at_s": 13.83,
+      "why": "13.83s: synth and backing voices enter -- the strongest moment in the intro. One beat of white across the row, the first hit of the show."
+    },
+    {
+      "effect": "beam",
+      "pattern": "hold",
+      "pan": 0.72,
+      "tilt": 0.44,
+      "colour": "#ffffff",
+      "amount": 0.4,
+      "prism": 0,
+      "strobe": 0,
+      "fade_ms": 0,
+      "from_s": 13.83,
+      "to_s": 25.56,
+      "why": "And the head's FIRST movement: one glide from the left wall to the right, on the entrance, then still again. One move in half a minute, so it is seen."
+    },
+    {
+      "at_s": 17.75,
+      "effect": "gear",
+      "from": 1,
+      "to": 2,
+      "why": "17.8s — tempo moves 89 to 119 bpm",
+      "id": "g3",
+      "at": {
+        "bar": 7,
+        "beat": 1,
+        "beats": 2
+      },
+      "start_s": 17.75,
+      "head": false
+    },
+    {
+      "at_s": 21.8,
+      "effect": "isolate",
+      "which": 2,
+      "colour": "#ffffff",
+      "rest": 0,
+      "why": "21.8s — everything drops back behind lead-vocal",
+      "id": "g5",
+      "at": {
+        "bar": 9,
+        "beat": 1,
+        "beats": 2
+      },
+      "start_s": 21.8,
+      "head": false
+    },
+    {
+      "effect": "beam",
+      "pattern": "hold",
+      "pan": 0.72,
+      "tilt": 0.44,
+      "colour": "#ffffff",
+      "amount": 0.22,
+      "prism": 0,
+      "strobe": 0,
+      "fade_ms": 900,
+      "from_s": 25.56,
+      "to_s": 32.72,
+      "why": "Towards the riff the pin dims, so the black at 32.72 is arrived at rather than cut to, and the white hit at 33.75 lands in a room that had been going quiet."
+    },
+    {
+      "from_s": 32.718,
+      "to_s": 33.72,
+      "effect": "blackout",
+      "why": "two beats of nothing, so the riff has something to arrive into",
+      "id": "g7",
+      "at": {
+        "bar": 14,
+        "beat": 2,
+        "beats": 2
+      },
+      "start_s": 32.718,
+      "fade_ms": 0
+    },
+    {
+      "from_s": 33,
+      "to_s": 33.72,
+      "effect": "hush",
+      "depth": 0.12,
+      "keep": "inner",
+      "for_beats": 2,
+      "why": "33.0s — the track falls away, so the room does too",
+      "id": "g8",
+      "at": {
+        "bar": 14,
+        "beat": 3,
+        "beats": 1
+      },
+      "start_s": 33
+    },
+    {
+      "effect": "beam",
+      "pattern": "stations",
+      "colour": "#ffffff",
+      "amount": 0.9,
+      "prism": 0,
+      "strobe": 12,
+      "from_s": 33.75,
+      "to_s": 41.75,
+      "why": "THE BASS RIFF. Bass and strings, no drums, no voice: the one fixture that can point becomes the soloist. Clean white beam, no prism, snapping to a new wall on every downbeat -- four bars, four places -- and drifting across each bar with the bass. The row stays a dim blue field underneath so the beam cuts. Now: it NODS hard and FLASHES on beats 2 and 2-and-a-half, where the riff punches, from the very first bar -- and each turn to a new wall begins a beat early so the head arrives on the downbeat instead of leaving on it.",
+      "fade_ms": 0,
+      "accents": [
+        2,
+        2.5
+      ],
+      "strobe_on": "accent"
+    },
+    {
+      "effect": "glare",
+      "colour": "#ffffff",
+      "amount": 1,
+      "extent": "all",
+      "head": false,
+      "for_beats": 1,
+      "fade_ms": 0,
+      "at_s": 33.75,
+      "why": "33.75s: bass and strings arrive together out of a one-second black. ONE beat of the whole row in white -- the row's single big statement in this phrase -- and then it drops to the blue bed and the head takes over. This was the biggest arrival in the first half of the song and it had been getting a dim bed fading in."
+    },
+    {
+      "effect": "trade",
+      "travel": true,
+      "direction": "lr",
+      "runs": 1,
+      "rest": 0.3,
+      "peak": 1,
+      "colours": [
+        "#ff1616",
+        "#2f5bff"
+      ],
+      "for_beats": 1,
+      "fade_ms": 0,
+      "from_s": 34.252,
+      "to_s": 34.504,
+      "why": "Bar 15: the red spark leaves on beat 2 and ARRIVES on the 'and' of 2 -- which is where this riff actually punches, every bar. A run is read when it lands, not when it starts, so it is aimed to land on the hit and takes a quarter of a second, not a whole beat. Left to right.",
+      "head": false
+    },
+    {
+      "effect": "trade",
+      "travel": true,
+      "direction": "rl",
+      "runs": 1,
+      "rest": 0.3,
+      "peak": 1,
+      "colours": [
+        "#ff1616",
+        "#3b5bff"
+      ],
+      "for_beats": 1,
+      "fade_ms": 0,
+      "from_s": 36.26,
+      "to_s": 36.51,
+      "why": "Bar 16: the red spark leaves on beat 2 and ARRIVES on the 'and' of 2 -- which is where this riff actually punches, every bar. A run is read when it lands, not when it starts, so it is aimed to land on the hit and takes a quarter of a second, not a whole beat. Right to left.",
+      "head": false
+    },
+    {
+      "effect": "trade",
+      "travel": true,
+      "direction": "lr",
+      "runs": 1,
+      "rest": 0.3,
+      "peak": 1,
+      "colours": [
+        "#ff1616",
+        "#485dff"
+      ],
+      "for_beats": 1,
+      "fade_ms": 0,
+      "from_s": 38.26,
+      "to_s": 38.51,
+      "why": "Bar 17: the red spark leaves on beat 2 and ARRIVES on the 'and' of 2 -- which is where this riff actually punches, every bar. A run is read when it lands, not when it starts, so it is aimed to land on the hit and takes a quarter of a second, not a whole beat. Left to right.",
+      "head": false
+    },
+    {
+      "effect": "glare",
+      "colour": "#565dff",
+      "amount": 0.6,
+      "extent": "all",
+      "for_beats": 1,
+      "fade_ms": 0,
+      "at_s": 39.76,
+      "why": "Bar 18: the borrowed major turns MINOR at 40.0s. One beat of the whole row lifting in blue-violet on the downbeat, the first time the row has spoken at full since the riff began. The head snaps at the same instant.",
+      "head": false
+    },
+    {
+      "effect": "trade",
+      "travel": true,
+      "direction": "rl",
+      "runs": 1,
+      "rest": 0.3,
+      "peak": 1,
+      "colours": [
+        "#ff1616",
+        "#565dff"
+      ],
+      "for_beats": 1,
+      "fade_ms": 0,
+      "from_s": 40.258,
+      "to_s": 40.506,
+      "why": "Bar 18: the red spark leaves on beat 2 and ARRIVES on the 'and' of 2 -- which is where this riff actually punches, every bar. A run is read when it lands, not when it starts, so it is aimed to land on the hit and takes a quarter of a second, not a whole beat. Right to left.",
+      "head": false
+    },
+    {
+      "effect": "beam",
+      "pattern": "stations",
+      "colour": "#ffffff",
+      "amount": 1,
+      "prism": 0,
+      "strobe": 12,
+      "strobe_on": "accent",
+      "from_s": 41.75,
+      "to_s": 48.24,
+      "why": "Second phrase, drums creeping in: the head keeps its stations but now STROBES on every downbeat -- the first strobe of the show, white, a burst at the top of each bar. Rhythm from the fixture that can do it. Now: it NODS hard and FLASHES on beats 2 and 2-and-a-half, where the riff punches, from the very first bar -- and each turn to a new wall begins a beat early so the head arrives on the downbeat instead of leaving on it.",
+      "fade_ms": 0,
+      "accents": [
+        2,
+        2.5
+      ]
+    },
+    {
+      "effect": "glare",
+      "colour": "#2f5bff",
+      "amount": 0.62,
+      "extent": "all",
+      "for_beats": 2,
+      "fade_ms": 0,
+      "from_s": 41.75,
+      "to_s": 42.754999999999995,
+      "why": "Bar 19, beats 1-2: the whole row BLAZES for two beats Blue, not violet: the second phrase had drifted to purple and lost the red entirely, so the half that was meant to escalate went from three colours to one dim one. The bed stays blue; the red grows in what moves.",
+      "head": false
+    },
+    {
+      "effect": "chase",
+      "direction": "rl",
+      "per_beat": 1,
+      "colour": "#e01313",
+      "amount": 1,
+      "rest": 0,
+      "extent": "all",
+      "for_beats": 1,
+      "fade_ms": 0,
+      "from_s": 42.754999999999995,
+      "to_s": 43.2575,
+      "why": "Beat 3: the row collapses to ONE lamp running right to left in a single beat, everything else dark. In RED -- the spark's colour. In phrase one the red was a quarter-second spark once a bar; here it is a whole running lamp, twice a bar. Same identity, more of it.",
+      "head": false
+    },
+    {
+      "effect": "chase",
+      "direction": "lr",
+      "per_beat": 1,
+      "colour": "#e01313",
+      "amount": 1,
+      "rest": 0,
+      "extent": "all",
+      "for_beats": 1,
+      "fade_ms": 0,
+      "from_s": 43.2575,
+      "to_s": 43.76,
+      "why": "Beat 4: and straight back the other way. In RED -- the spark's colour. In phrase one the red was a quarter-second spark once a bar; here it is a whole running lamp, twice a bar. Same identity, more of it.",
+      "head": false
+    },
+    {
+      "effect": "glare",
+      "colour": "#2f5bff",
+      "amount": 0.76,
+      "extent": "all",
+      "for_beats": 2,
+      "fade_ms": 0,
+      "from_s": 43.76,
+      "to_s": 44.76,
+      "why": "Bar 20, beats 1-2: the whole row BLAZES for two beats Blue, not violet: the second phrase had drifted to purple and lost the red entirely, so the half that was meant to escalate went from three colours to one dim one. The bed stays blue; the red grows in what moves.",
+      "head": false
+    },
+    {
+      "effect": "chase",
+      "direction": "lr",
+      "per_beat": 1,
+      "colour": "#e01313",
+      "amount": 1,
+      "rest": 0,
+      "extent": "all",
+      "for_beats": 1,
+      "fade_ms": 0,
+      "from_s": 44.76,
+      "to_s": 45.26,
+      "why": "Beat 3: the row collapses to ONE lamp running left to right in a single beat, everything else dark. In RED -- the spark's colour. In phrase one the red was a quarter-second spark once a bar; here it is a whole running lamp, twice a bar. Same identity, more of it.",
+      "head": false
+    },
+    {
+      "effect": "chase",
+      "direction": "rl",
+      "per_beat": 1,
+      "colour": "#e01313",
+      "amount": 1,
+      "rest": 0,
+      "extent": "all",
+      "for_beats": 1,
+      "fade_ms": 0,
+      "from_s": 45.26,
+      "to_s": 45.76,
+      "why": "Beat 4: and straight back the other way. In RED -- the spark's colour. In phrase one the red was a quarter-second spark once a bar; here it is a whole running lamp, twice a bar. Same identity, more of it.",
+      "head": false
+    },
+    {
+      "effect": "glare",
+      "colour": "#2f5bff",
+      "amount": 0.9,
+      "extent": "all",
+      "for_beats": 2,
+      "fade_ms": 0,
+      "from_s": 45.76,
+      "to_s": 46.75,
+      "why": "Bar 21, beats 1-2: the whole row BLAZES for two beats Blue, not violet: the second phrase had drifted to purple and lost the red entirely, so the half that was meant to escalate went from three colours to one dim one. The bed stays blue; the red grows in what moves.",
+      "head": false
+    },
+    {
+      "effect": "chase",
+      "direction": "rl",
+      "per_beat": 1,
+      "colour": "#e01313",
+      "amount": 1,
+      "rest": 0,
+      "extent": "all",
+      "for_beats": 1,
+      "fade_ms": 0,
+      "from_s": 46.75,
+      "to_s": 47.245000000000005,
+      "why": "Beat 3: the row collapses to ONE lamp running right to left in a single beat, everything else dark. In RED -- the spark's colour. In phrase one the red was a quarter-second spark once a bar; here it is a whole running lamp, twice a bar. Same identity, more of it.",
+      "head": false
+    },
+    {
+      "effect": "chase",
+      "direction": "lr",
+      "per_beat": 1,
+      "colour": "#e01313",
+      "amount": 1,
+      "rest": 0,
+      "extent": "all",
+      "for_beats": 1,
+      "fade_ms": 0,
+      "from_s": 47.245000000000005,
+      "to_s": 47.74,
+      "why": "Beat 4: and straight back the other way. In RED -- the spark's colour. In phrase one the red was a quarter-second spark once a bar; here it is a whole running lamp, twice a bar. Same identity, more of it.",
+      "head": false
+    },
+    {
+      "effect": "glare",
+      "colour": "#2f5bff",
+      "amount": 0.85,
+      "extent": "all",
+      "for_beats": 3,
+      "fade_ms": 0,
+      "from_s": 47.74,
+      "to_s": 48.745000000000005,
+      "why": "Bar 22: the row holds blue and swells for three beats, right up to the single black beat.",
+      "head": false
+    },
+    {
+      "effect": "blackout",
+      "from_s": 49.25,
+      "to_s": 49.72,
+      "fade_ms": 0,
+      "why": "One beat of nothing before the drop. The music is at full weight here, so two beats read as a fault; one reads as a breath."
+    },
+    {
+      "effect": "glare",
+      "colour": "#ffffff",
+      "amount": 1,
+      "extent": "all",
+      "for_beats": 1,
+      "fade_ms": 0,
+      "at_s": 49.75,
+      "why": "49.75s, THE DROP. Every lamp to full WHITE for one beat, snapped, no fade. The room has been blue for fifty seconds; this is the first white and the drums arriving.",
+      "head": false
+    },
+    {
+      "effect": "beam",
+      "pattern": "snap",
+      "colour": "#e01313",
+      "amount": 1,
+      "prism": 100,
+      "strobe": 0,
+      "from_s": 49.75,
+      "to_s": 55.76,
+      "why": "Bars 23-25: red prism, snapping side to side every two beats, a nod on every beat.",
+      "fade_ms": 0,
+      "accents": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "prism_on": "beat",
+      "anticipate": true
+    },
+    {
+      "effect": "glare",
+      "colour": "#ffffff",
+      "extent": "all",
+      "for_beats": 1,
+      "fade_ms": 0,
+      "at_s": 52.76,
+      "why": "52.76s: the whole band at full strength, six families at once. One full BEAT of white across the row, held, not an 80ms flash -- the head keeps snapping red underneath it.",
+      "amount": 1,
+      "head": false
+    },
+    {
+      "effect": "anticipation",
+      "colour": "#ffffff",
+      "intensity": 1,
+      "for_beats": 3,
+      "head": false,
+      "fade_ms": 0,
+      "from_s": 63.76,
+      "to_s": 65.25,
+      "why": "BAR 30. The drums fall out completely across this bar (kick 0.47 -> 0.04 -> 0.00) before the second drop. White flashes take their place: quick, seemingly random, accelerating across the row for three beats -- the transition move. The 240ms hole at 64.20 stays as a stutter inside them."
+    },
+    {
+      "effect": "beam",
+      "pattern": "hold",
+      "pan": 0.5,
+      "tilt": 0.4,
+      "colour": "#ffffff",
+      "amount": 1,
+      "prism": 0,
+      "strobe": 14,
+      "strobe_on": "beat",
+      "fade_ms": 0,
+      "from_s": 63.76,
+      "to_s": 65.25,
+      "why": "The head joins the acceleration: dead centre, white, no prism, strobing on every beat -- the first time the head has flashed white since the riff. Then the beat of black at 65.25, then red."
+    },
+    {
+      "effect": "blackout",
+      "from_s": 64.2,
+      "to_s": 64.44,
+      "why": "A genuine 200ms hole at 64.2s: the band falls to under half its own level right here, just before the drums come back full. Black for exactly as long as the hole, so the room breathes with the track instead of over it.",
+      "fade_ms": 0
+    },
+    {
+      "effect": "blackout",
+      "why": "One beat of nothing before the drums come back full at bar 31.",
+      "from_s": 65.25,
+      "to_s": 65.75,
+      "at": {
+        "bar": 30,
+        "beat": 4
+      },
+      "fade_ms": 0
+    },
+    {
+      "effect": "impact",
+      "colour": "#ffffff",
+      "extent": "all",
+      "for_beats": 2,
+      "why": "Bar 31 lands. The build was kept cold on purpose so this is the first white the room sees.",
+      "at_s": 65.75,
+      "at": {
+        "bar": 31,
+        "beat": 1
+      },
+      "fade_ms": 0
+    },
+    {
+      "at_s": 72.25,
+      "effect": "lift",
+      "by": 0.35,
+      "over_beats": 8,
+      "tilt": 0.4,
+      "why": "72.3s — lead-vocal enters",
+      "id": "g24",
+      "at": {
+        "bar": 34,
+        "beat": 1,
+        "beats": 8
+      },
+      "start_s": 72.25
+    },
+    {
+      "effect": "beam",
+      "pattern": "hold",
+      "pan": 0.5,
+      "tilt": 0.42,
+      "colour": "#ffffff",
+      "amount": 0.3,
+      "prism": 0,
+      "strobe": 0,
+      "fade_ms": 600,
+      "from_s": 73.76,
+      "to_s": 81.76,
+      "why": "The head rests -- a low still white pin -- through the exchange, so its return at the third drop lands as a return."
+    },
+    {
+      "effect": "blackout",
+      "from_s": 80.1,
+      "to_s": 80.38,
+      "why": "The same thing at 80.1s, 250ms, on the approach to the next drop.",
+      "fade_ms": 0
+    },
+    {
+      "effect": "blackout",
+      "why": "One beat of nothing before bar 40, the hardest span in the song.",
+      "from_s": 83.25,
+      "to_s": 83.75,
+      "at": {
+        "bar": 39,
+        "beat": 4
+      },
+      "fade_ms": 0
+    },
+    {
+      "effect": "impact",
+      "colour": "#ffffff",
+      "extent": "all",
+      "for_beats": 2,
+      "why": "Bar 40 lands. The build was kept cold on purpose so this is the first white the room sees.",
+      "at_s": 83.75,
+      "at": {
+        "bar": 40,
+        "beat": 1
+      },
+      "fade_ms": 0
+    },
+    {
+      "effect": "beam",
+      "pattern": "snap",
+      "colour": "#e01313",
+      "amount": 1,
+      "prism": 100,
+      "strobe": 12,
+      "strobe_on": "beat",
+      "fade_ms": 0,
+      "from_s": 83.76,
+      "to_s": 91.76,
+      "why": "Third drop: the head's move a third time, escalated once more -- red, prism, and now strobing on EVERY beat, not just the downbeat. Same figure each drop, bigger each time, so the room learns it and then feels it grow."
+    },
+    {
+      "at_s": 85.76,
+      "effect": "impact",
+      "colour": "#ffffff",
+      "extent": "all",
+      "for_beats": 2,
+      "why": "the drums arrive at 85.76s",
+      "id": "g27",
+      "at": {
+        "bar": 41,
+        "beat": 1,
+        "beats": 2
+      },
+      "start_s": 85.76,
+      "fade_ms": 0
+    },
+    {
+      "from_s": 89.697,
+      "to_s": 91.25,
+      "effect": "anticipation",
+      "for_beats": 3,
+      "colour": "#ffffff",
+      "intensity": 1,
+      "why": "Three beats of white climb into the resolve, then one black beat.",
+      "id": "g28",
+      "at": {
+        "bar": 42,
+        "beat": 4,
+        "beats": 2
+      },
+      "start_s": 89.697,
+      "fade_ms": 0
+    },
+    {
+      "from_s": 91.25,
+      "to_s": 91.73,
+      "effect": "blackout",
+      "why": "One beat of nothing before the resolve at 91.76.",
+      "id": "g29",
+      "at": {
+        "bar": 43,
+        "beat": 2,
+        "beats": 2
+      },
+      "start_s": 90.728,
+      "fade_ms": 0
+    },
+    {
+      "at_s": 91.76,
+      "effect": "impact",
+      "colour": "#ffffff",
+      "extent": "all",
+      "for_beats": 2,
+      "why": "THE PEAK at 91.76s — the loudest stretch of the song",
+      "id": "g30",
+      "at": {
+        "bar": 44,
+        "beat": 1,
+        "beats": 2
+      },
+      "start_s": 91.76,
+      "fade_ms": 0
+    },
+    {
+      "effect": "trade",
+      "travel": true,
+      "direction": "lr",
+      "runs": 2,
+      "rest": 0.62,
+      "peak": 0.85,
+      "colours": [
+        "#e01313",
+        "#2f5bff"
+      ],
+      "for_beats": 4,
+      "head": false,
+      "fade_ms": 0,
+      "from_s": 91.76,
+      "to_s": 93.76,
+      "why": "THE COLOUR WAVE as this section's identity: the row stays lit in blue and a RED position walks across it, twice a bar, turning each bar. Only the hue moves. Red over blue, not white over red: white is a hit in this show and a white wave here outshone the loudest section that follows. Peak 0.85: this is a RESOLVE, and it sits under the climax that follows, not over it."
+    },
+    {
+      "effect": "beam",
+      "pattern": "hold",
+      "pan": 0.5,
+      "tilt": 0.42,
+      "colour": "#e01313",
+      "amount": 0.35,
+      "prism": 0,
+      "strobe": 0,
+      "fade_ms": 800,
+      "from_s": 91.76,
+      "to_s": 97.76,
+      "why": "The head RESTS through the resolve -- a still red pin, low, no prism -- after eight bars of snapping. Its white explosion at 97.76 is an entrance because of these six bars, and the row's colour wave has the room to itself."
+    },
+    {
+      "effect": "trade",
+      "travel": true,
+      "direction": "rl",
+      "runs": 2,
+      "rest": 0.62,
+      "peak": 0.85,
+      "colours": [
+        "#e01313",
+        "#2f5bff"
+      ],
+      "for_beats": 4,
+      "head": false,
+      "fade_ms": 0,
+      "from_s": 93.76,
+      "to_s": 95.76,
+      "why": "THE COLOUR WAVE as this section's identity: the row stays lit in blue and a RED position walks across it, twice a bar, turning each bar. Only the hue moves. Red over blue, not white over red: white is a hit in this show and a white wave here outshone the loudest section that follows. Peak 0.85: this is a RESOLVE, and it sits under the climax that follows, not over it."
+    },
+    {
+      "effect": "trade",
+      "travel": true,
+      "direction": "lr",
+      "runs": 2,
+      "rest": 0.62,
+      "peak": 0.85,
+      "colours": [
+        "#e01313",
+        "#2f5bff"
+      ],
+      "for_beats": 4,
+      "head": false,
+      "fade_ms": 0,
+      "from_s": 95.76,
+      "to_s": 97.76,
+      "why": "THE COLOUR WAVE as this section's identity: the row stays lit in blue and a RED position walks across it, twice a bar, turning each bar. Only the hue moves. Red over blue, not white over red: white is a hit in this show and a white wave here outshone the loudest section that follows. Peak 0.85: this is a RESOLVE, and it sits under the climax that follows, not over it."
+    },
+    {
+      "effect": "beam",
+      "pattern": "snap",
+      "colour": "#ffffff",
+      "amount": 1,
+      "prism": 100,
+      "prism_on": "beat",
+      "strobe": 12,
+      "strobe_on": "beat",
+      "accents": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "fade_ms": 0,
+      "from_s": 97.76,
+      "to_s": 109.76,
+      "why": "The head goes WHITE for the first time since the build -- prism pulsing, strobing and kicking on every beat, snapping side to side. The biggest the head gets, saved for the biggest the song gets."
+    },
+    {
+      "effect": "strobe",
+      "hz": 12,
+      "colour": "#ffffff",
+      "intensity": 1,
+      "extent": "all",
+      "head": false,
+      "for_beats": 2,
+      "fade_ms": 0,
+      "from_s": 98.26,
+      "to_s": 99.26,
+      "why": "A WHITE STROBE OVER A RED HOLD on one of the four hardest kicks in the song (98.50s): every 'on' is white and every 'off' is red, so the flash has a colour. Two beats."
+    },
+    {
+      "effect": "strobe",
+      "hz": 12,
+      "colour": "#ffffff",
+      "intensity": 1,
+      "extent": "all",
+      "head": false,
+      "for_beats": 3,
+      "fade_ms": 0,
+      "from_s": 100.76,
+      "to_s": 102.25,
+      "why": "White strobe for three beats, right up to the single black beat before the loudest kick."
+    },
+    {
+      "effect": "blackout",
+      "from_s": 102.25,
+      "to_s": 102.73,
+      "why": "One beat of nothing before the loudest kick in the song.",
+      "fade_ms": 0
+    },
+    {
+      "effect": "glare",
+      "colour": "#e01313",
+      "level": 1,
+      "extent": "all",
+      "at_s": 102.76,
+      "for_beats": 4,
+      "rise": -0.5,
+      "why": "THE LOUDEST KICK IN THE SONG at 102.76s -- full strength in the kick lane, the top of four consecutive bars that hold the four hardest hits on the record. Whole rig, full white, held for three beats. This is the peak of the show and it is placed on the hit rather than on a bar line. Four beats: this is the loudest kick in the song and the show's brightest moment lives here, not in the build.",
+      "fade_ms": 0
+    },
+    {
+      "from_s": 109.76,
+      "to_s": 111.823,
+      "effect": "strip",
+      "to": 0.1,
+      "over_beats": 4,
+      "why": "109.8s — the track strips back",
+      "id": "g34",
+      "at": {
+        "bar": 53,
+        "beat": 1,
+        "beats": 4
+      },
+      "start_s": 109.76
+    },
+    {
+      "effect": "beam",
+      "pattern": "hold",
+      "pan": 0.5,
+      "tilt": 0.44,
+      "colour": "#ff8a1a",
+      "amount": 0.35,
+      "prism": 0,
+      "strobe": 0,
+      "fade_ms": 1200,
+      "from_s": 109.76,
+      "to_s": 120.29,
+      "why": "The head rests in amber, still, through the strip-back."
+    },
+    {
+      "from_s": 113,
+      "to_s": 113.72,
+      "effect": "hush",
+      "depth": 0.12,
+      "keep": "inner",
+      "for_beats": 2,
+      "why": "113.0s — the track falls away, so the room does too",
+      "id": "g35",
+      "at": {
+        "bar": 54,
+        "beat": 3,
+        "beats": 1
+      },
+      "start_s": 113
+    },
+    {
+      "effect": "beam",
+      "pattern": "sweep",
+      "colour": "#ff8a1a",
+      "amount": 0.6,
+      "prism": 0,
+      "strobe": 0,
+      "fade_ms": 800,
+      "from_s": 120.29,
+      "to_s": 127.6,
+      "why": "120.29s, the octave lift: the head's ONE slow sweep of the whole night, amber, across the room and back once a bar, to the end. Saved for the resolution."
+    },
+    {
+      "from_s": 121.322,
+      "to_s": 124.416,
+      "effect": "swell",
+      "colour": "#ffffff",
+      "rise": 0.8,
+      "for_beats": 6,
+      "why": "and blooms after it",
+      "id": "g38",
+      "at": {
+        "bar": 58,
+        "beat": 4,
+        "beats": 6
+      },
+      "start_s": 121.322
+    },
+    {
+      "at_s": 123.77,
+      "effect": "lift",
+      "by": 0.35,
+      "over_beats": 8,
+      "tilt": 0.4,
+      "why": "123.8s — lead-vocal and vocal enter",
+      "id": "g39",
+      "at": {
+        "bar": 60,
+        "beat": 1,
+        "beats": 8
+      },
+      "start_s": 123.77
+    },
+    {
+      "at_s": 126.71,
+      "effect": "gear",
+      "from": 1,
+      "to": 2,
+      "why": "126.7s — the beat drops away",
+      "id": "g40",
+      "at": {
+        "bar": 61,
+        "beat": 3,
+        "beats": 2
+      },
+      "start_s": 126.71
+    },
+    {
+      "at_s": 127.226,
+      "effect": "cut",
+      "for_beats": 1,
+      "why": "and one beat of nothing where the beat drops away",
+      "id": "g41",
+      "at": {
+        "bar": 61,
+        "beat": 4,
+        "beats": 1
+      },
+      "start_s": 127.226,
+      "fade_ms": 0
+    },
+    {
+      "effect": "glare",
+      "colour": "#ff8a1a",
+      "amount": 0.7,
+      "extent": "outer",
+      "from_s": 18.18,
+      "to_s": 18.68,
+      "fade_ms": 0,
+      "head": false,
+      "why": "Bar 7: the horns punch just before beat 2. Amber on the outer pair for one beat -- amber belongs to the brass, and this is the first time it is heard. The inner pair stays on the blue pulse, so the room reads blue with a brass flash on each side."
+    },
+    {
+      "effect": "glare",
+      "colour": "#ff8a1a",
+      "amount": 0.85,
+      "extent": "outer",
+      "from_s": 20.23,
+      "to_s": 20.73,
+      "fade_ms": 0,
+      "head": false,
+      "why": "Bar 8: the same punch, a little heavier, so a little brighter."
+    },
+    {
+      "effect": "glare",
+      "colour": "#ff8a1a",
+      "amount": 1,
+      "rise": 0.9,
+      "extent": "outer",
+      "from_s": 22.4,
+      "to_s": 23.78,
+      "fade_ms": 0,
+      "head": false,
+      "why": "Bar 9: the horns stop punching and climb instead, rising through the bar into bar 10. The outer pair swells amber with them."
+    },
+    {
+      "effect": "glare",
+      "colour": "#ff8a1a",
+      "amount": 0.9,
+      "rise": 1.2,
+      "extent": "all",
+      "from_s": 24.7,
+      "to_s": 25.56,
+      "fade_ms": 0,
+      "head": false,
+      "why": "Bar 10: timpani and violins swell for the last beat and a half. The whole row swells amber into the hit."
+    },
+    {
+      "effect": "glare",
+      "colour": "#ff8a1a",
+      "amount": 1,
+      "extent": "all",
+      "at_s": 25.56,
+      "for_beats": 2,
+      "fade_ms": 0,
+      "head": false,
+      "why": "The hit at 25.56, where the song changes section: full amber for two beats, then amber is gone until the outro, where the orchestra takes over again and it comes back as a callback."
+    },
+    {
+      "effect": "glare",
+      "colour": "#e01313",
+      "amount": 1,
+      "extent": "outer",
+      "from_s": 41.02,
+      "to_s": 41.3,
+      "fade_ms": 0,
+      "head": false,
+      "why": "The joining piece. After the riff's first phrase the song walks down through two quick chords: F at 41.02, E at 41.30, landing on D minor at 41.76 where the second phrase starts. Step one: the outer pair, red."
+    },
+    {
+      "effect": "glare",
+      "colour": "#e01313",
+      "amount": 1,
+      "extent": "inner",
+      "from_s": 41.3,
+      "to_s": 41.75,
+      "fade_ms": 0,
+      "head": false,
+      "why": "Step two: the inner pair, red. The two steps close inwards, and the full blue glare of the second phrase lands on 41.76."
+    },
+    {
+      "effect": "glare",
+      "colour": "#ffffff",
+      "amount": 1,
+      "extent": "all",
+      "at_s": 55.76,
+      "for_beats": 1,
+      "fade_ms": 0,
+      "head": false,
+      "why": "Bar 26, beat 1: one white beat marks the singer's entrance and the change of room."
+    },
+    {
+      "effect": "beam",
+      "pattern": "hold",
+      "pan": 0.5,
+      "tilt": 0.42,
+      "colour": "#ffffff",
+      "amount": 0.9,
+      "prism": 0,
+      "strobe": 0,
+      "accents": [
+        1,
+        3
+      ],
+      "from_s": 55.76,
+      "to_s": 61.76,
+      "fade_ms": 0,
+      "why": "Bars 26-28: the head stands still in the centre, white, and nods on beats 1 and 3 with the singer. No prism, no strobe -- it is listening."
+    },
+    {
+      "effect": "trade",
+      "travel": true,
+      "direction": "lr",
+      "runs": 1,
+      "rest": 0.3,
+      "peak": 1,
+      "colours": [
+        "#e01313",
+        "#2f5bff"
+      ],
+      "from_s": 57.26,
+      "to_s": 57.76,
+      "for_beats": 1,
+      "fade_ms": 0,
+      "head": false,
+      "why": "Bar 26, beat 4: a fast red run across the blue room, the pickup into the next bar -- the lights answering the singer's line."
+    },
+    {
+      "effect": "trade",
+      "travel": true,
+      "direction": "rl",
+      "runs": 1,
+      "rest": 0.3,
+      "peak": 1,
+      "colours": [
+        "#e01313",
+        "#2f5bff"
+      ],
+      "from_s": 59.26,
+      "to_s": 59.76,
+      "for_beats": 1,
+      "fade_ms": 0,
+      "head": false,
+      "why": "Bar 27, beat 4: a fast red run across the blue room, the pickup into the next bar -- the lights answering the singer's line."
+    },
+    {
+      "effect": "trade",
+      "travel": true,
+      "direction": "lr",
+      "runs": 1,
+      "rest": 0.3,
+      "peak": 1,
+      "colours": [
+        "#e01313",
+        "#2f5bff"
+      ],
+      "from_s": 61.26,
+      "to_s": 61.76,
+      "for_beats": 1,
+      "fade_ms": 0,
+      "head": false,
+      "why": "Bar 28, beat 4: a fast red run across the blue room, the pickup into the next bar -- the lights answering the singer's line. The third one runs straight into bar 29."
+    },
+    {
+      "effect": "glare",
+      "colour": "#ffffff",
+      "amount": 1,
+      "extent": "all",
+      "at_s": 61.76,
+      "for_beats": 1,
+      "fade_ms": 0,
+      "head": false,
+      "why": "Bar 29, beat 1: one white beat as the bass and drums come back."
+    },
+    {
+      "effect": "beam",
+      "pattern": "snap",
+      "colour": "#e01313",
+      "amount": 1,
+      "prism": 100,
+      "prism_on": "beat",
+      "strobe": 8,
+      "strobe_on": "beat",
+      "accents": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "anticipate": true,
+      "from_s": 61.76,
+      "to_s": 63.76,
+      "fade_ms": 0,
+      "why": "Bar 29: red prism is back, now with a strobe on every beat, for the hardest bar before the pause."
+    }
+  ]
 }
