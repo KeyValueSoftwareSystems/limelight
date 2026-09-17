@@ -1079,7 +1079,7 @@ export default function StagePage() {
                 <div className="flex-1 h-[2px] rounded-full bg-accent/10 overflow-hidden">
                   <div className="h-full w-[30%] rounded-full progress-indeterminate" style={{ background: "var(--grad-primary)" }} />
                 </div>
-                <span className="text-[11px] font-medium text-accent flex-none animate-pulse-bar">Building show\u2026</span>
+                <span className="text-[11px] font-medium text-accent flex-none animate-pulse-bar">Building show…</span>
               </div>
             </div>
           ) : stageMsg ? (

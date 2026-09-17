@@ -51,8 +51,7 @@ export function Menu({ trigger, items, onPick, align = "left", keepOpen = false 
       {open && (
         <div
           role="menu"
-          style={{ boxShadow: "var(--elev-popover)" }}
-          className={`absolute top-[calc(100%+4px)] z-50 min-w-[180px] py-[var(--spacing-s1)] bg-bg-overlay border border-solid border-line-strong rounded-[7px] ${
+          className={`liquid absolute top-[calc(100%+4px)] z-50 min-w-[180px] py-[var(--spacing-s1)] rounded-[var(--radius-md)] ${
             align === "right" ? "right-0" : "left-0"
           }`}
         >

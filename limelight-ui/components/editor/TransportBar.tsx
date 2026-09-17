@@ -45,7 +45,7 @@ function Btn({
   const tone = danger
     ? "text-danger bg-transparent hover:bg-danger/[0.14] disabled:hover:bg-transparent"
     : active
-      ? "mat-on text-ink"
+      ? "liquid-well text-ink"
       : "bg-transparent text-ink-dim hover:text-ink hover:bg-[var(--surface-2)]";
   return (
     <button
@@ -139,7 +139,7 @@ export function TransportBar({
         onClick={onToggle}
         aria-pressed={playing}
         title={playing ? "Pause (space)" : "Play (space)"}
-        className={`${playing ? "mat-accent-key" : "mat-key"} gloss flex-none inline-flex items-center justify-center w-[32px] h-[32px] rounded-full cursor-pointer`}
+        className={`${playing ? "liquid liquid-key liquid-accent" : "liquid liquid-key"} gloss flex-none inline-flex items-center justify-center w-[32px] h-[32px] rounded-full cursor-pointer`}
       >
         <svg width="13" height="13" viewBox="0 0 12 12" fill="currentColor" aria-hidden>
           {playing ? (
@@ -330,7 +330,7 @@ export function TransportBar({
 
       <Rule />
 
-      <span className="mat-well inline-flex items-center gap-px rounded-[7px] p-[2px]">
+      <span className="liquid-well inline-flex items-center gap-px rounded-[7px] p-[2px]">
         <Btn onClick={onZoomOut} icon title="Zoom out (scroll down over the timeline)">
           <span aria-hidden>−</span>
           <span className="sr-only">Zoom out</span>

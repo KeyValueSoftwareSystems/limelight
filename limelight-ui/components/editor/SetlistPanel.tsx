@@ -43,7 +43,7 @@ export function SetlistPanel() {
                 );
               }}
               className={`w-full flex items-center gap-[9px] px-[8px] py-[6px] rounded-[6px] border-0 text-left cursor-pointer transition-colors duration-150 ${
-                on ? "mat-on" : "bg-transparent hover:bg-[var(--surface-1)]"
+                on ? "liquid-well" : "bg-transparent hover:bg-[var(--surface-1)]"
               }`}
             >
               <span

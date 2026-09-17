@@ -65,7 +65,7 @@ export function NewShowDialog({
       aria-label="New show"
     >
       <div
-        className="mat-glass flex flex-col w-full max-w-[760px] max-h-[82vh] rounded-[var(--radius-xl)] overflow-hidden animate-scale-in"
+        className="liquid flex flex-col w-full max-w-[760px] max-h-[82vh] rounded-[var(--radius-xl)] overflow-hidden animate-scale-in"
       >
         <div className="flex-none flex items-start gap-[14px] px-[22px] pt-[20px] pb-[14px]">
           <div className="min-w-0 flex-1">
@@ -95,7 +95,7 @@ export function NewShowDialog({
               placeholder="Search songs"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="mat-well w-full h-[var(--control-h)] pl-[35px] pr-[12px] rounded-[var(--radius-sm)] text-[13px] text-ink outline-none placeholder:text-ink-dimmer"
+              className="liquid-well w-full h-[var(--control-h)] pl-[35px] pr-[12px] rounded-[var(--radius-sm)] text-[13px] text-ink outline-none placeholder:text-ink-dimmer"
             />
           </div>
           <UploadButton />
@@ -182,7 +182,7 @@ export function NewShowDialog({
             type="button"
             disabled={chosen.length === 0}
             onClick={() => onCreate(chosen)}
-            className="mat-accent-key gloss flex-none inline-flex items-center h-[var(--control-h)] px-[16px] rounded-[var(--radius-sm)] text-[13px] font-semibold cursor-pointer disabled:opacity-40 disabled:cursor-default"
+            className="liquid liquid-key liquid-accent flex-none inline-flex items-center h-[var(--control-h)] px-[16px] rounded-[var(--radius-sm)] text-[13px] font-semibold cursor-pointer disabled:opacity-40 disabled:cursor-default"
           >
             {chosen.length > 1 ? `Design ${chosen.length} songs` : "Design this show"}
           </button>

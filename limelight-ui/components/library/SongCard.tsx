@@ -38,7 +38,7 @@ export function SongCard({ song, onOpen, position = null }: SongCardProps) {
       disabled={!playable}
       title={song.title}
       aria-pressed={position != null ? true : undefined}
-      className={`song-card mat-key group flex flex-col text-left p-0 rounded-[var(--radius-md)] overflow-hidden w-full ${
+      className={`song-card panel panel-lift group flex flex-col text-left p-0 rounded-[var(--radius-lg)] overflow-hidden w-full ${
         position != null ? "ring-1 ring-[var(--edge-accent)]" : ""
       } ${
         playable

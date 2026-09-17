@@ -20,7 +20,7 @@ export function ShowCard({
       type="button"
       onClick={() => onOpen(show)}
       title={show.name}
-      className="mat-key group flex flex-col text-left p-0 rounded-[var(--radius-md)] overflow-hidden cursor-pointer w-full"
+      className="panel panel-lift group flex flex-col text-left p-0 rounded-[var(--radius-lg)] overflow-hidden cursor-pointer w-full"
 
     >
       <div className="relative w-full overflow-hidden" style={{ paddingBottom: "62%" }}>

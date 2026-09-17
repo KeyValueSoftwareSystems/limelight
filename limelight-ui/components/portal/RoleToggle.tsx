@@ -27,7 +27,7 @@ export function RoleToggle() {
 
   return (
     <div
-      className="mat-well flex items-center h-[30px] gap-[2px] rounded-[7px] p-[2px]"
+      className="liquid-well flex items-center h-[30px] gap-[2px] rounded-[7px] p-[2px]"
       role="radiogroup"
       aria-label="Mode"
     >
@@ -42,7 +42,7 @@ export function RoleToggle() {
             onClick={() => handleRole(r.id)}
             title={r.id === "creator" ? "Design shows from songs" : "Play shows to a room"}
             className={`flex items-center gap-[6px] h-full px-[11px] rounded-[5px] border-0 text-[12px] cursor-pointer transition-colors duration-200 ease-[var(--ease)] ${
-              active ? "mat-key gloss font-medium text-ink" : "bg-transparent font-normal text-ink-dim hover:text-ink"
+              active ? "liquid liquid-key font-medium text-ink" : "bg-transparent font-normal text-ink-dim hover:text-ink"
             }`}
           >
             <r.Icon size={12} strokeWidth={active ? 2 : 1.5} />

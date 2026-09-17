@@ -21,7 +21,7 @@ export const Field = forwardRef<HTMLInputElement, FieldProps>(
       )}
       <input
         ref={ref}
-        className={`mat-well w-full h-[var(--control-h)] ${icon ? "pl-[36px]" : "pl-[12px]"} pr-[12px]
+        className={`liquid-well w-full h-[var(--control-h)] ${icon ? "pl-[36px]" : "pl-[12px]"} pr-[12px]
           rounded-[var(--radius-sm)] text-[13px] font-medium text-ink
           placeholder:text-ink-dimmer placeholder:font-normal
           ${className}`}

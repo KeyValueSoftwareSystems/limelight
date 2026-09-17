@@ -135,7 +135,7 @@ export default function ShowsPage() {
           <button
             type="button"
             onClick={() => setPicking(true)}
-            className="mat-accent-key gloss flex-none inline-flex items-center gap-[7px] h-[var(--control-h)] px-[15px] rounded-[var(--radius-sm)] text-[13px] font-semibold cursor-pointer"
+            className="liquid liquid-key liquid-accent flex-none inline-flex items-center gap-[7px] h-[var(--control-h)] px-[15px] rounded-[var(--radius-sm)] text-[13px] font-semibold cursor-pointer"
           >
             <Plus size={15} strokeWidth={2.4} />
             New show
@@ -200,7 +200,7 @@ export default function ShowsPage() {
             <button
               type="button"
               onClick={() => setPicking(true)}
-              className="mat-accent-key gloss mt-[18px] inline-flex items-center gap-[7px] h-[var(--control-h)] px-[15px] rounded-[var(--radius-sm)] text-[13px] font-semibold cursor-pointer"
+              className="liquid liquid-key liquid-accent mt-[18px] inline-flex items-center gap-[7px] h-[var(--control-h)] px-[15px] rounded-[var(--radius-sm)] text-[13px] font-semibold cursor-pointer"
             >
               <Plus size={15} strokeWidth={2.4} />
               New show

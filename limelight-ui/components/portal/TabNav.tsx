@@ -23,7 +23,7 @@ export function TabNav() {
 
   return (
     <nav
-      className="mat-well flex items-stretch gap-[2px] h-[30px] p-[2px] rounded-[7px]"
+      className="liquid-well flex items-stretch gap-[2px] h-[30px] p-[2px] rounded-[7px]"
       aria-label="Sections"
     >
       {tabs.map((tab) => {
@@ -35,7 +35,7 @@ export function TabNav() {
             aria-current={active ? "page" : undefined}
             className={`flex items-center h-full px-[15px] rounded-[5px] no-underline
               text-[12.5px] tracking-[-0.004em] transition-colors duration-[var(--dur-state)]
-              ${active ? "mat-key gloss font-medium text-ink" : "font-normal text-ink-dim hover:text-ink"}`}
+              ${active ? "liquid liquid-key font-medium text-ink" : "font-normal text-ink-dim hover:text-ink"}`}
           >
             {tab.label}
           </Link>

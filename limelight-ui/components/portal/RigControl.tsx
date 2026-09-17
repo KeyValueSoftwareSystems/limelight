@@ -117,8 +117,8 @@ export function RigControl({ onToggle }: { onToggle: () => void }) {
 
       {expanded && (
         <div
-          className="absolute right-0 top-[calc(100%+8px)] z-50 w-[320px] rounded-[var(--radius-md)] overflow-hidden animate-scale-in"
-          style={{ background: "linear-gradient(180deg, #1A1B2E 0%, #12131F 100%)", boxShadow: "var(--elev-popover)" }}
+          className="liquid absolute right-0 top-[calc(100%+8px)] z-50 w-[320px] rounded-[var(--radius-md)] overflow-hidden animate-scale-in"
+
         >
           <div className="p-[16px]" style={{ background: info.bgColour }}>
             <div className="flex items-start gap-[10px]">

@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { usePortalStore } from "@/store/portal";
 import * as api from "@/lib/api";
 import { VenueCard } from "@/components/venues/VenueCard";
-import { Input } from "@/components/ui/Input";
+import { Field, SegmentedControl } from "@/components/ui";
+import { Search } from "lucide-react";
 import type { Venue, Layout } from "@/lib/types";
 
 type Filter = "all" | "open" | "locked";
@@ -63,40 +64,32 @@ export default function VenuesPage() {
 
   return (
     <div className="flex flex-col overflow-hidden flex-1">
-      <header className="flex-none px-[var(--spacing-s6)] pt-[var(--spacing-s5)] pb-[var(--spacing-s4)] border-b border-solid border-line">
-        <div className="flex items-end justify-between gap-[var(--spacing-s4)] flex-wrap">
-          <div>
-            <h1 className="display m-0">Venues</h1>
-            <p className="label mt-[7px] m-0">
-              {rooms.length} {rooms.length === 1 ? "room" : "rooms"}, {openCount} you can design for
-            </p>
-          </div>
-          <Input
-            placeholder="search"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            autoComplete="off"
-            aria-label="Search venues"
-          />
-        </div>
+      <header className="flex-none px-[28px] pt-[26px] pb-[16px]">
+        <h1 className="text-[30px] font-semibold tracking-[-0.028em] m-0 leading-[1.1] text-ink">
+          Venues
+        </h1>
+        <p className="text-[13px] text-ink-dim mt-[7px] m-0">
+          {rooms.length} {rooms.length === 1 ? "room" : "rooms"} · {openCount} you can design for
+        </p>
 
-        <div className="flex gap-[var(--spacing-s1)] mt-[var(--spacing-s4)]">
-          {FILTERS.map((f) => {
-            const on = filter === f.id;
-            return (
-              <button
-                key={f.id}
-                type="button"
-                aria-pressed={on}
-                onClick={() => setFilter(f.id)}
-                className={`px-[var(--spacing-s3)] h-[26px] border border-solid rounded-full text-[length:var(--text-xs)] bg-transparent cursor-pointer transition-colors duration-[var(--dur-state)] ${
-                  on ? "border-line-strong text-ink" : "border-line text-dimmer hover:text-dim"
-                }`}
-              >
-                {f.label}
-              </button>
-            );
-          })}
+        <div className="mt-[18px] flex items-center gap-[20px] flex-wrap">
+          <div className="w-[300px] max-w-full">
+            <Field
+              icon={<Search size={15} />}
+              type="text"
+              placeholder="Search rooms and rigs"
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              autoComplete="off"
+              aria-label="Search venues"
+            />
+          </div>
+          <SegmentedControl
+            aria-label="Filter venues"
+            value={filter}
+            onChange={setFilter}
+            segments={FILTERS}
+          />
         </div>
       </header>
 

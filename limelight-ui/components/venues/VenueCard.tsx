@@ -98,7 +98,7 @@ export function VenueCard({ venue, layouts, onDesign }: VenueCardProps) {
           <button
             type="button"
             onClick={() => onDesign(venue, chosen)}
-            className="h-[var(--hit)] px-[var(--spacing-s3)] border border-solid border-line-strong rounded-[5px] bg-transparent text-ink text-[length:var(--text-sm)] cursor-pointer transition-colors duration-[var(--dur-state)] hover:bg-bg-overlay"
+            className="liquid liquid-key liquid-accent h-[var(--control-h)] px-[16px] rounded-[var(--radius-sm)] text-[13px] font-semibold"
           >
             Design for this room
           </button>

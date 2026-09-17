@@ -95,7 +95,7 @@ export function UploadButton() {
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
-          className="mat-accent-key gloss flex items-center gap-[7px] h-[var(--control-h)] px-[16px] rounded-[var(--radius-sm)] text-[13px] font-semibold cursor-pointer"
+          className="liquid liquid-key liquid-accent flex items-center gap-[7px] h-[var(--control-h)] px-[16px] rounded-[var(--radius-sm)] text-[13px] font-semibold cursor-pointer"
         >
           <Upload size={14} strokeWidth={2.5} />
           Upload track
@@ -111,7 +111,7 @@ export function UploadButton() {
         <input ref={inputRef} type="file" accept=".mp3,audio/mpeg" className="hidden" onChange={onInputChange} />
         <div className="flex-1">
           <div className="flex items-center justify-between mb-[4px]">
-            <span className="text-[11px] font-medium text-ink-dim">Uploading\u2026</span>
+            <span className="text-[11px] font-medium text-ink-dim">Uploading…</span>
             <span className="mono text-[11px] text-ink-dimmer tabular-nums">{pct}%</span>
           </div>
           <div className="h-[3px] w-full rounded-full bg-white/[0.06] overflow-hidden">

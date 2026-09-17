@@ -49,8 +49,7 @@ function IdentityControl() {
 
       {open && (
         <div
-          className="absolute right-0 top-[calc(100%+8px)] z-50 w-[260px] rounded-[var(--radius-md)] p-[16px] animate-scale-in"
-          style={{ background: "linear-gradient(180deg, #1A1B2E 0%, #12131F 100%)", boxShadow: "var(--elev-popover)" }}
+          className="liquid absolute right-0 top-[calc(100%+8px)] z-50 w-[260px] rounded-[var(--radius-lg)] p-[16px] animate-scale-in"
         >
           <label className="block text-[11px] font-semibold text-ink-dimmer tracking-[0.03em] mb-[8px]">Your name</label>
           <input
@@ -60,7 +59,7 @@ function IdentityControl() {
             onChange={(e) => setAuthor(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter" || e.key === "Escape") setOpen(false); }}
             placeholder="Enter your name"
-            className="w-full h-[36px] px-[12px] rounded-[var(--radius-sm)] border border-solid border-white/10 bg-white/[0.04] text-[14px] text-ink outline-none focus:border-accent/60 focus:bg-white/[0.06] transition-all duration-200"
+            className="liquid-well w-full h-[var(--control-h)] px-[12px] rounded-[var(--radius-sm)] text-[13px] text-ink outline-none"
           />
           <p className="text-[11px] text-ink-dimmer mt-[10px] m-0 leading-[1.6]">
             Attached to every show you save.
@@ -95,7 +94,7 @@ export function Topbar({ onRigToggle }: TopbarProps) {
   const role = usePortalStore((s) => s.role);
 
   return (
-    <header className="mat-glass flex-none flex items-center gap-[16px] px-[16px] h-[54px] border-b border-solid border-white/[0.05] z-40">
+    <header className="liquid flex-none flex items-center gap-[16px] px-[16px] h-[54px] border-b border-solid border-white/[0.05] z-40">
       <Link
         href="/shows"
         aria-label="Limelight \u2014 your shows"
