@@ -61,6 +61,15 @@ FAMILY_SHADES = {
     "voices": ("crimson", "blood", "scarlet"),
     "drums": ("scarlet", "ember", "crimson"),
 }
+FAMILY_TEMPERATURE = {
+    "brass": ("violet", "ember", "amber", "saffron"),
+    "strings": ("indigo", "violet", "oxblood", "amber"),
+    "guitars": ("oxblood", "ember", "scarlet", "amber"),
+    "keys": ("indigo", "teal", "violet", "saffron"),
+    "winds": ("teal", "saffron", "amber", "bone"),
+    "voices": ("indigo", "blood", "crimson", "scarlet"),
+    "drums": ("blood", "crimson", "scarlet", "ember"),
+}
 COUNTER = {
     "brass": "indigo", "strings": "amber", "guitars": "teal", "keys": "ember",
     "winds": "violet", "voices": "indigo", "drums": "teal",
@@ -201,6 +210,32 @@ def author(song, out_path=None):
     )
     sections = sc.get("sections") or []
     holes = holes_in(song)
+    chords = sc.get("btc_chords_raw") or []
+    _beats = [b["t"] for b in sc.get("beats", [])]
+
+    def _to_beat(t):
+        if not _beats:
+            return t
+        return min(_beats, key=lambda x: abs(x - t))
+
+    chord_edges = sorted({round(_to_beat(c["start"]), 3) for c in chords})
+    emo = sorted((e for e in (sc.get("emotion") or []) if e.get("start") is not None),
+                 key=lambda e: e["start"])
+
+    def emo_at(t):
+        best = None
+        for e in emo:
+            if e["start"] <= t < e.get("end", e["start"]):
+                return e
+            if e["start"] <= t:
+                best = e
+        return best or (emo[0] if emo else {})
+
+    def snap_chord(t, tol=0.6):
+        if not chord_edges:
+            return t
+        k = min(chord_edges, key=lambda x: abs(x - t))
+        return k if abs(k - t) <= tol else t
     Emax = max(r["E"] for r in rows) or 1.0
     peak_t = None
     for t, kind, w in moments:
@@ -350,8 +385,17 @@ def author(song, out_path=None):
             fade = 0.6
             why = "spotlight at %.1fs - the head points, the row stays level" % mom[0]
         else:
-            shades = FAMILY_SHADES.get(top_fam, ("crimson", "blood", "scarlet"))
-            main = shades[len(cues) % len(shades)]
+            e = emo_at(r["t"])
+            mode = e.get("mode")
+            bright = e.get("brightness")
+            ramp = FAMILY_TEMPERATURE.get(top_fam, ("indigo", "blood", "crimson", "scarlet"))
+            if mode is None:
+                warmth = 0.5
+            else:
+                warmth = max(0.0, min(1.0, (float(mode) + 1.0) / 2.0))
+            if bright is not None:
+                warmth = max(0.0, min(1.0, warmth * 0.72 + (float(bright) / 10.0) * 0.28))
+            main = ramp[min(len(ramp) - 1, int(warmth * len(ramp)))]
             counter = COUNTER.get(top_fam, "indigo")
             split_look = (len(cues) % 3 == 1) and level > 0.3
             if split_look:
@@ -384,8 +428,9 @@ def author(song, out_path=None):
                                "c": counter})
             chase = None
             fade = 0.35 if not fam_changed else 0.15
-            why = "bar %d: %s leads, E %.2f, %d hits - %s in %s%s" % (
-                bar, top_fam, r["E"], dens, fig, main,
+            why = "bar %d: %s leads, E %.2f, %d hits, mode %s - %s in %s%s" % (
+                bar, top_fam, r["E"], dens,
+                ("%+.2f" % mode) if mode is not None else "?", fig, main,
                 (" against %s inside" % counter) if (split_look or len(layers) > 1) else "")
             add_layers = layers
 
@@ -412,6 +457,54 @@ def author(song, out_path=None):
     for n, c in enumerate(cues):
         c["id"] = n + 1
         c.pop("_t", None)
+
+    prev_mode = None
+    for e in emo:
+        m = e.get("mode")
+        if m is None:
+            continue
+        t0 = e["start"]
+        if t0 < 1.0 or t0 > rows[-1]["end"] - 1.0:
+            prev_mode = m
+            continue
+        if prev_mode is not None and abs(float(m) - float(prev_mode)) < 0.30:
+            prev_mode = m
+            continue
+        prev_mode = m
+        t = snap_chord(t0)
+        prior = [c for c in cues if c.get("_t", 0) <= t + 1e-6 and c.get("look")]
+        if not prior:
+            continue
+        base = prior[-1]
+        row = min(rows, key=lambda rr: abs(rr["t"] - t))
+        fam = max(row["fam"], key=lambda f: row["fam"][f]) if row["fam"] else "voices"
+        ramp = FAMILY_TEMPERATURE.get(fam, ("indigo", "blood", "crimson", "scarlet"))
+        w = max(0.0, min(1.0, (float(m) + 1.0) / 2.0))
+        b = e.get("brightness")
+        if b is not None:
+            w = max(0.0, min(1.0, w * 0.72 + (float(b) / 10.0) * 0.28))
+        col = ramp[min(len(ramp) - 1, int(w * len(ramp)))]
+        was = None
+        for k in ("lamps", "outer", "inner", "ends"):
+            if k in (base.get("look") or {}) and base["look"][k].get("c"):
+                was = base["look"][k]["c"]
+                break
+        if col == was:
+            continue
+        look = json.loads(json.dumps(base.get("look") or {}))
+        for k, v in look.items():
+            if isinstance(v, dict) and v.get("c") == was:
+                v["c"] = col
+        nc = {"id": 0, "at": {"second": round(t, 3)}, "_t": t, "fade": 0.55,
+              "look": look,
+              "why": "the harmony turns here - mode %+.2f, %s. Colour moves to %s on the chord change"
+                     % (float(m), e.get("emotion", "?"), col)}
+        if base.get("chases"):
+            nc["chases"] = json.loads(json.dumps(base["chases"]))
+        elif base.get("chase"):
+            nc["chase"] = json.loads(json.dumps(base["chase"]))
+        cues.append(nc)
+    cues.sort(key=lambda c: c.get("_t", 0))
 
     accents = []
     strong = sorted(hits, key=lambda h: -h[1])[:60]
