@@ -57,7 +57,22 @@ let hp = [0.30, 0.40];
 const headHold = (a, b, colour, amount, extra, why) => { G.push({ effect: "beam", pattern: "hold", pan: hp[0], tilt: hp[1], colour, amount, prism: 0, strobe: 0, from_s: r2(a), to_s: r2(b), fade_ms: 0, ...extra, why }); };
 const glide = (a, b, to, colour, amount, extra, why) => { G.push({ effect: "beam", pattern: "glide", pan: hp[0], tilt: hp[1], pan_to: to[0], tilt_to: to[1], colour, amount, prism: 0, strobe: 0, from_s: r2(a), to_s: r2(b), fade_ms: 0, ...extra, why }); hp = to; };
 const parked = () => { hp = PARK.slice(); };
-const DROPHEAD = { prism: 100, strobe: 0 };
+/* The fixture has more than pan, tilt and brightness. Three dimensions the show
+   never touched, now given a job each:
+     GOBO    a pattern in the glass. Open = one hard clean beam; flower = texture.
+             Open belongs to the drops (the beam is the statement); flower belongs
+             to the build and the outro, where the beam is the only thing moving
+             and needs something to look at.
+     SPEED   how hard the motors drive. 0 snaps, 1 is silk. Fast in the drops so a
+             two-bar turn arrives crisply; slow in the outro so a fourteen-second
+             sweep has no steps in it.
+     SPIN    the colour wheel turning free instead of resting on a slot -- the
+             fixture's rainbow. Kept for one place only: the loudest twelve
+             seconds of the record. A thing used once is an event; used twice it
+             is a feature. */
+const GOBO_OPEN = 0, GOBO_FLOWER = 80;
+const DROPHEAD  = { prism: 100, strobe: 0, gobo: GOBO_OPEN, speed: 0.12 };   // clean hard beam, motors quick
+const BUILDHEAD = { gobo: GOBO_FLOWER, speed: 0.75 };                        // textured beam, smooth travel
 const L = 0.20, R = 0.80, C = 0.50;
 
 /* the same transition figure, used wherever the singer repeats that line: the room goes
@@ -101,9 +116,9 @@ row(BLUE, 0.5, "inner", 1.76, 8.49, { rise: 0.5 }, "First vocal phrase (1.76-8.4
 row(WHITE, 0.6, "all", before(13.83, 2), 13.83, { rise: 0.9, fade_ms: 0 }, "Two beats before the entrance the row swells white from the bed to full, so the hit at 13.83 is the top of a rise already under way.");
 hit(WHITE, 13.83, 1, "The entrance at 13.83: one white beat at the top of the swell.", 0.9);
 row(BLUE, 0.5, "inner", 15.90, 17.22, { rise: 0.4 }, "Third vocal phrase (15.90-17.22): the inner pair lifts again, into the tempo change at 17.75.");
-headHold(0, 12.83, WHITE, 0.25, {}, "Opening: a dim white pin, still. The head at rest is what makes its first move an event.");
-glide(12.83, 13.83, [0.72, 0.44], WHITE, 0.30, {}, "The entrance: one smooth move to a new spot over the two beats of the swell, arriving exactly on 13.83.");
-headHold(13.83, 25.56, WHITE, 0.30, {}, "Bars 4-10: still at its new spot.");
+headHold(0, 12.83, WHITE, 0.25, { gobo: GOBO_OPEN, speed: 0.85 }, "Opening: a dim white pin, still. The head at rest is what makes its first move an event.");
+glide(12.83, 13.83, [0.72, 0.44], WHITE, 0.30, { gobo: GOBO_OPEN, speed: 0.55 }, "The entrance: one smooth move to a new spot over the two beats of the swell, arriving exactly on 13.83.");
+headHold(13.83, 25.56, WHITE, 0.30, { gobo: GOBO_OPEN, speed: 0.85 }, "Bars 4-10: still at its new spot.");
 /* ======================= BRASS STABS (bars 7-10, 17.75-25.56) ======================= */
 wash(17.75, 25.56, 0.36, BLUE, "Bars 7-10: a steady blue bed; the brass carries the rhythm and amber carries the brass.", 600);
 row(AMBER, 0.7, "outer", 18.18, 18.68, { fade_ms: 0 }, "Bar 7: the horns punch just before beat 2 -- amber on the outer pair for one beat. Amber belongs to the brass.");
@@ -115,7 +130,7 @@ hit(AMBER, 25.56, 2, "The hit at 25.56 where the song changes section: full ambe
 bed(25.56, 33.75, "wash", { amount: 0.36, colour: BLUE, extent: "inner", fade_ms: 600 }, "Bars 11-14: the inner pair holds blue under the voice alone.");
 row(BLUE, 0.55, "outer", 27.02, before(33.75, 3), { rise: 0.7 }, "The lead-in phrase (27.02-33.75): the outer pair grows with the singer for six seconds.");
 black(before(33.75, 1), 33.75, "One beat of nothing before the riff lands.");
-headHold(25.56, before(33.75, 1), WHITE, 0.22, { fade_ms: 900 }, "Bars 11-14: dimming to a glow under the voice alone; off in the black beat.");
+headHold(25.56, before(33.75, 1), WHITE, 0.22, { fade_ms: 900, gobo: GOBO_OPEN, speed: 0.9 }, "Bars 11-14: dimming to a glow under the voice alone; off in the black beat.");
 parked();
 /* ======================= THE BUILD (bars 15-22, 33.75-49.75) =======================
    What an audience feels as a build is ACCELERATION: the whole room pulsing, the
@@ -141,9 +156,9 @@ stage(bar(19), bar(22), 0.14, 0.78, 1, "Bars 19-21, the second half: still one p
    second half instead of on an impact. */
 vocalFlicks(bar(19) - 2.5 * (barLen(18) / 4), bar(19), "The transition between the halves: two and a half beats of black, with a red flick on every note the score hears -- the same figure that sets up the drop.");
 /* the head across the build: slow across, faster back, then still and strobing */
-glide(33.75, bar(19) - 2.5 * (barLen(18) / 4), PARK, WHITE, 0.40, { strobe: 12, strobe_on: "downbeat" }, "Riff phrase one: the head glides slowly across the room over the whole phrase (8 seconds), at 40%, with a strobe pop on each downbeat.");
-glide(41.75, bar(21), [L, 0.45], WHITE, 0.55, { strobe: 12, strobe_on: "beat", fade_ms: 0 }, "Riff phrase two: the head sets off from where the transition parked it and glides across over two bars, brighter, popping on every beat.");
-headHold(bar(21), bar(22), WHITE, 0.70, { strobe: 14, strobe_on: "beat" }, "Bar 21: the head holds and strobes on every beat as the room peaks.");
+glide(33.75, bar(19) - 2.5 * (barLen(18) / 4), PARK, WHITE, 0.40, { ...BUILDHEAD, strobe: 12, strobe_on: "downbeat", nod: 0.05 }, "Riff phrase one: the head glides across the room over the whole phrase, textured beam, and nods into every beat so it keeps time while it travels -- a strobe pop on each downbeat.");
+glide(41.75, bar(21), [L, 0.42], WHITE, 0.55, { ...BUILDHEAD, strobe: 12, strobe_on: "beat", fade_ms: 0, nod: 0.09 }, "Riff phrase two: the head sets off from where the transition parked it and glides across over two bars, brighter, popping on every beat.");
+headHold(bar(21), bar(22), WHITE, 0.70, { strobe: 14, strobe_on: "beat", gobo: GOBO_FLOWER, prism: 100, speed: 0.2 }, "Bar 21: the prism comes in for the first time and the beam splits into six as the room peaks -- held, strobing on every beat.");
 /* bar 22: the volume collapses, then "pa da ni sa ri", then the drop */
 const syll = sc.melody.filter(n => n.start > 48.3 && n.start < 49.6 && n.velocity >= 0.4).map(n => n.start).sort((a, b) => a - b);
 black(bar(22), 49.75, "Bar 22: the whole band falls away at 47.7 (the score's pause at 48.0) -- full blackout, head included, as the volume shrinks.");
@@ -158,8 +173,8 @@ pump(49.75, bar(24), 0.45, [RED, BLUE], "Bar 23: the drop arrives under the held
 pump(bar(24), bar(26), 0.45, [RED, BLUE], "Bars 24-25: the pump, red and blue.", { flash_bar: 22 });
 /* the drop head: a swing that repeats every bar -- out over beats 1-2, back over 3-4, reversing on beats 1 and 3 -- nodding into every beat */
 const swing = (a, b, colour, amount, extra, why) => { G.push({ effect: "beam", pattern: "swing", pan: L, pan_to: R, tilt: 0.45, swing_beats: 4, nod: 0.08, nod_lead: 0.25, colour, amount, prism: 100, strobe: 0, from_s: r2(a), to_s: r2(b), fade_ms: 0, ...extra, why }); hp = [L, 0.45]; };
-glide(land1, bar(24), [L, 0.45], RED, 0.70, { prism: 100 }, "Bar 23, after the landing: the head glides from the parked spot to the left wall, ready for the swing.");
-swing(bar(24), bar(30), RED, 0.70, {}, "Drop 1, bars 24-29: the head swings left to right over beats 1-2 and back over 3-4, turning on beats 1 and 3, and nods into every beat -- one figure, repeated every bar, red prism.");
+glide(land1, bar(24), [L, 0.45], RED, 0.70, DROPHEAD, "Bar 23, after the landing: the head glides from the parked spot to the left wall, ready for the swing.");
+swing(bar(24), bar(30), RED, 0.70, DROPHEAD, "Drop 1, bars 24-29: the head swings left to right over beats 1-2 and back over 3-4, turning on beats 1 and 3, and nods into every beat -- one figure, repeated every bar, red prism.");
 /* The singer's own figure, right through the first drop. The score shows it in every bar
    from 24 to 32: he picks the line up on the "and of beat 2" and releases it onto the next
    downbeat. So on alternate bars the pump holds beats 1-2, the room drops out as he comes
@@ -186,12 +201,12 @@ glide(bar(32), bar(34), [R, 0.50], RED, 0.70, DROPHEAD, "…");
 glide(bar(34), bar(35), [C, 0.50], RED, 0.70, DROPHEAD, "…to the centre for the backbeat section.");
 pump(before(73.75, 2), bar(35), 0.45, [RED, BLUE], "Bar 34, beats 3-4: the floor comes down a step on the way into the backbeat bars; the pump stays.", { flash_bar: 30 });
 pump(bar(35), bar(38), 0.40, [RED, BLUE], "Bars 35-37: a kick on every beat in the score, heaviest on 2 and 4 -- the pump at a lower floor, the drop breathing.");
-glide(bar(35), bar(36), [0.25, 0.62], WHITE, 0.30, {}, "Bars 35-37: a slow figure through the backbeat bars -- down to the left, across and up to the right, back to the centre -- one bar a side, dim white.");
-glide(bar(36), bar(37), [0.75, 0.38], WHITE, 0.30, {}, "…");
-glide(bar(37), bar(38), [C, 0.50], WHITE, 0.30, {}, "…");
+glide(bar(35), bar(36), [0.25, 0.62], WHITE, 0.30, { ...BUILDHEAD, speed: 0.9 }, "Bars 35-37: a slow figure through the backbeat bars -- down to the left, across and up to the right, back to the centre -- one bar a side, dim white.");
+glide(bar(36), bar(37), [0.75, 0.38], WHITE, 0.30, { ...BUILDHEAD, speed: 0.9 }, "…");
+glide(bar(37), bar(38), [C, 0.50], WHITE, 0.30, { ...BUILDHEAD, speed: 0.9 }, "…");
 wash(bar(38), bar(39), 0.30, BLUE, "Bar 38: the whole band stops -- only the voice. A low blue floor.", 300);
 row(WHITE, 0.6, "all", beatAfter(80.2), bar(39), { rise: 0.9, fade_ms: 0 }, "Bar 38 from beat 2, where the voice re-enters alone: the row climbs white for three beats and lands on the band's return at 81.76.");
-glide(bar(38), bar(39), [C, 0.58], WHITE, 0.30, {}, "Bar 38: the head rises with the white climb.");
+glide(bar(38), bar(39), [C, 0.62], WHITE, 0.30, { ...BUILDHEAD, speed: 0.6, nod: 0.06 }, "Bar 38: the head rises with the white climb, nodding on the beat.");
 const SIDES = { pairs: true, split: "sides" };   // bars 39-46: left half and right half take turns, beat by beat
 pump(bar(39), before(83.75, 2), 0.50, [RED, BLUE], "Bar 39, beats 1-2: the band is back -- a new section, so a new room: the left half pumps on one beat, the right half on the next.", SIDES);
 glide(bar(39), before(83.75, 2), PARK, RED, 0.70, DROPHEAD, "Bar 39: red prism, gliding to the parked spot.");
@@ -208,19 +223,19 @@ glide(bar(42), bar(43), PARK, RED, 0.70, DROPHEAD, "…to the parked spot before
 wash(bar(43), 91.76, 0.38, BLUE, "Bar 43: the drums stop; a plain floor under the white climb.", 300);
 row(WHITE, 0.85, "all", bar(43), before(91.76, 1), { rise: 0.35, fade_ms: 0 }, "Bar 43: the row climbs white for three beats into the resolve -- a release, not a drop, so it rises rather than flicks.");
 black(before(91.76, 1), 91.76, "One black beat before the resolve.");
-headHold(bar(43), before(91.76, 1), WHITE, 0.70, { strobe: 14, strobe_on: "beat" }, "Bar 43: the head holds and strobes on the beat under the climb.");
+headHold(bar(43), before(91.76, 1), WHITE, 0.70, { strobe: 14, strobe_on: "beat", prism: 100, gobo: GOBO_FLOWER, speed: 0.2 }, "Bar 43: the head holds and strobes on the beat under the climb.");
 parked();
 G.push({ effect: "impact", colour: WHITE, extent: "all", at_s: 91.76, for_beats: 1, fade_ms: 0, head: false, why: "The resolve lands: one beat of white." });
 pump(91.76, bar(47), 0.40, [RED, BLUE], "Bars 44-46, the resolve: the same left/right pump at a lower floor -- the section keeps its identity while the music releases.", SIDES);
-glide(91.76, bar(47), [C, 0.55], RED, 0.30, { fade_ms: 800 }, "The resolve: red, dim, drifting slowly to the centre under the waves.");
+glide(91.76, bar(47), [C, 0.55], RED, 0.30, { fade_ms: 800, prism: 0, gobo: GOBO_OPEN, speed: 0.95 }, "The resolve: prism out, one clean red beam, motors at their smoothest -- the calm between the third drop and the climax.");
 /* ======================= CLIMAX (bars 48-53, 97.76-109.76) ======================= */
 pump(bar(47), 109.76, 0.65, [WHITE, WHITE], "Bars 47-52, the loudest twelve seconds on the record: white only, the whole row pumping from a high floor to full on every beat -- maximum energy until the stop at 109.76.");
 G.push({ effect: "strobe", hz: 12, colour: WHITE, intensity: 1, extent: "all", head: false, at_s: 98.26, for_beats: 2, fade_ms: 0, why: "98.26: white strobe for two beats on the first big kick of the climax." });
 G.push({ effect: "strobe", hz: 12, colour: WHITE, intensity: 1, extent: "all", head: false, from_s: 100.76, to_s: 102.25, for_beats: 3, fade_ms: 0, why: "100.76: white strobe for three beats up to the single black beat before the loudest kick in the song." });
 black(102.25, 102.76, "One beat of nothing before the loudest kick.");
 G.push({ effect: "glare", colour: WHITE, amount: 1, extent: "all", at_s: 102.76, for_beats: 2, fade_ms: 0, head: false, why: "102.76, the loudest kick: two beats of full white held, then back to the pump." });
-const CH = { prism: 100, strobe: 12, strobe_on: "downbeat" };
-glide(bar(47), bar(48), [L, 0.50], WHITE, 1.0, CH, "The climax: the pendulum at one bar a side, white prism at full, strobe pop on each downbeat -- the one place the head is the brightest thing in the room.");
+const CH = { prism: 100, strobe: 12, strobe_on: "downbeat", gobo: GOBO_FLOWER, speed: 0.08, spin: 0.35, nod: 0.06 };   // the only place the colour wheel is let off its slot
+glide(bar(47), bar(48), [L, 0.50], WHITE, 1.0, CH, "The climax: everything the fixture has, and the only place it gets it. Prism on, flower gobo, motors at full speed, a strobe pop on each downbeat, a nod into every beat, and the colour wheel spinning free instead of sitting on white -- the one place the head is the brightest thing in the room.");
 glide(bar(48), bar(49), [R, 0.50], WHITE, 1.0, CH, "…");
 glide(bar(49), 102.25, PARK, WHITE, 1.0, CH, "…to the parked spot for the black beat.");
 parked();
@@ -240,9 +255,9 @@ wash(123.77, 127.61, 0.30, AMBER, "The last entrance: amber settles a step.", 60
 wash(127.61, 128.28, 0.22, AMBER, "The beat has gone; the room settles again.", 600);
 black(127.23, 127.75, "One beat of nothing where the beat drops away, as the score marks the rhythm change.");
 wash(128.28, 131.29, 0.06, AMBER, "The song ends in silence; the room fades to black with it.", 2500);
-glide(109.76, 116.76, [0.10, 0.56], AMBER, 0.30, { fade_ms: 600 }, "The outro: one wide, slow sweep of the room in amber -- seven seconds to the far left...");
-glide(116.76, 123.77, [0.90, 0.62], AMBER, 0.30, {}, "...seven seconds across to the far right as the strings swell...");
-glide(123.77, 127.23, [C, 0.70], AMBER, 0.35, {}, "...and home to the centre, a touch brighter, for the last entrance. Off with the black beat at 127.23, and it stays off.");
+glide(109.76, 116.76, [0.10, 0.56], AMBER, 0.30, { fade_ms: 600, prism: 0, gobo: GOBO_FLOWER, speed: 1 }, "The outro: one wide, slow sweep of the room in amber -- seven seconds to the far left...");
+glide(116.76, 123.77, [0.90, 0.62], AMBER, 0.30, { gobo: GOBO_FLOWER, speed: 1 }, "...seven seconds across to the far right as the strings swell...");
+glide(123.77, 127.23, [C, 0.52], AMBER, 0.35, { gobo: GOBO_FLOWER, speed: 1 }, "...and home to the centre and up, the beam lifting towards vertical for the last entrance. Off with the black beat at 127.23, and it stays off.");
 
 /* ---- write ---- */
 const start = g => g.at_s ?? g.from_s;

@@ -594,6 +594,8 @@
       "from_s": 0,
       "to_s": 12.83,
       "fade_ms": 0,
+      "gobo": 0,
+      "speed": 0.85,
       "why": "Opening: a dim white pin, still. The head at rest is what makes its first move an event."
     },
     {
@@ -634,6 +636,8 @@
       "from_s": 12.83,
       "to_s": 13.83,
       "fade_ms": 0,
+      "gobo": 0,
+      "speed": 0.55,
       "why": "The entrance: one smooth move to a new spot over the two beats of the swell, arriving exactly on 13.83."
     },
     {
@@ -648,6 +652,8 @@
       "from_s": 13.83,
       "to_s": 25.56,
       "fade_ms": 0,
+      "gobo": 0,
+      "speed": 0.85,
       "why": "Bars 4-10: still at its new spot."
     },
     {
@@ -731,6 +737,8 @@
       "from_s": 25.56,
       "to_s": 33.26,
       "fade_ms": 900,
+      "gobo": 0,
+      "speed": 0.9,
       "why": "Bars 11-14: dimming to a glow under the voice alone; off in the black beat."
     },
     {
@@ -777,8 +785,11 @@
       "from_s": 33.75,
       "to_s": 40.506,
       "fade_ms": 0,
+      "gobo": 80,
+      "speed": 0.75,
       "strobe_on": "downbeat",
-      "why": "Riff phrase one: the head glides slowly across the room over the whole phrase (8 seconds), at 40%, with a strobe pop on each downbeat."
+      "nod": 0.05,
+      "why": "Riff phrase one: the head glides across the room over the whole phrase, textured beam, and nods into every beat so it keeps time while it travels -- a strobe pop on each downbeat."
     },
     {
       "effect": "glare",
@@ -870,7 +881,7 @@
       "pan": 0.663,
       "tilt": 0.498,
       "pan_to": 0.2,
-      "tilt_to": 0.45,
+      "tilt_to": 0.42,
       "colour": "#ffffff",
       "amount": 0.55,
       "prism": 0,
@@ -878,23 +889,28 @@
       "from_s": 41.75,
       "to_s": 45.76,
       "fade_ms": 0,
+      "gobo": 80,
+      "speed": 0.75,
       "strobe_on": "beat",
+      "nod": 0.09,
       "why": "Riff phrase two: the head sets off from where the transition parked it and glides across over two bars, brighter, popping on every beat."
     },
     {
       "effect": "beam",
       "pattern": "hold",
       "pan": 0.2,
-      "tilt": 0.45,
+      "tilt": 0.42,
       "colour": "#ffffff",
       "amount": 0.7,
-      "prism": 0,
+      "prism": 100,
       "strobe": 14,
       "from_s": 45.76,
       "to_s": 47.74,
       "fade_ms": 0,
       "strobe_on": "beat",
-      "why": "Bar 21: the head holds and strobes on every beat as the room peaks."
+      "gobo": 80,
+      "speed": 0.2,
+      "why": "Bar 21: the prism comes in for the first time and the beam splits into six as the room peaks -- held, strobing on every beat."
     },
     {
       "effect": "blackout",
@@ -1103,6 +1119,8 @@
       "from_s": 50.26,
       "to_s": 51.76,
       "fade_ms": 0,
+      "gobo": 0,
+      "speed": 0.12,
       "why": "Bar 23, after the landing: the head glides from the parked spot to the left wall, ready for the swing."
     },
     {
@@ -1121,6 +1139,8 @@
       "from_s": 51.76,
       "to_s": 63.76,
       "fade_ms": 0,
+      "gobo": 0,
+      "speed": 0.12,
       "why": "Drop 1, bars 24-29: the head swings left to right over beats 1-2 and back over 3-4, turning on beats 1 and 3, and nods into every beat -- one figure, repeated every bar, red prism."
     },
     {
@@ -1533,6 +1553,8 @@
       "from_s": 66.26,
       "to_s": 67.76,
       "fade_ms": 0,
+      "gobo": 0,
+      "speed": 0.12,
       "why": "Drop 2: the pendulum again, two bars a side."
     },
     {
@@ -1549,6 +1571,8 @@
       "from_s": 67.76,
       "to_s": 71.76,
       "fade_ms": 0,
+      "gobo": 0,
+      "speed": 0.12,
       "why": "…"
     },
     {
@@ -1653,6 +1677,8 @@
       "from_s": 71.76,
       "to_s": 73.75,
       "fade_ms": 0,
+      "gobo": 0,
+      "speed": 0.12,
       "why": "…to the centre for the backbeat section."
     },
     {
@@ -1669,6 +1695,8 @@
       "from_s": 73.75,
       "to_s": 75.76,
       "fade_ms": 0,
+      "gobo": 80,
+      "speed": 0.9,
       "why": "Bars 35-37: a slow figure through the backbeat bars -- down to the left, across and up to the right, back to the centre -- one bar a side, dim white."
     },
     {
@@ -1685,6 +1713,8 @@
       "from_s": 75.76,
       "to_s": 77.76,
       "fade_ms": 0,
+      "gobo": 80,
+      "speed": 0.9,
       "why": "…"
     },
     {
@@ -1701,6 +1731,8 @@
       "from_s": 77.76,
       "to_s": 79.76,
       "fade_ms": 0,
+      "gobo": 80,
+      "speed": 0.9,
       "why": "…"
     },
     {
@@ -1709,7 +1741,7 @@
       "pan": 0.5,
       "tilt": 0.5,
       "pan_to": 0.5,
-      "tilt_to": 0.58,
+      "tilt_to": 0.62,
       "colour": "#ffffff",
       "amount": 0.3,
       "prism": 0,
@@ -1717,7 +1749,10 @@
       "from_s": 79.76,
       "to_s": 81.76,
       "fade_ms": 0,
-      "why": "Bar 38: the head rises with the white climb."
+      "gobo": 80,
+      "speed": 0.6,
+      "nod": 0.06,
+      "why": "Bar 38: the head rises with the white climb, nodding on the beat."
     },
     {
       "effect": "glare",
@@ -1735,7 +1770,7 @@
       "effect": "beam",
       "pattern": "glide",
       "pan": 0.5,
-      "tilt": 0.58,
+      "tilt": 0.62,
       "pan_to": 0.663,
       "tilt_to": 0.498,
       "colour": "#e01313",
@@ -1745,6 +1780,8 @@
       "from_s": 81.76,
       "to_s": 82.76,
       "fade_ms": 0,
+      "gobo": 0,
+      "speed": 0.12,
       "why": "Bar 39: red prism, gliding to the parked spot."
     },
     {
@@ -1854,6 +1891,8 @@
       "from_s": 84.26,
       "to_s": 85.76,
       "fade_ms": 0,
+      "gobo": 0,
+      "speed": 0.12,
       "why": "Drop 3: the pendulum."
     },
     {
@@ -1870,6 +1909,8 @@
       "from_s": 85.76,
       "to_s": 87.76,
       "fade_ms": 0,
+      "gobo": 0,
+      "speed": 0.12,
       "why": "…"
     },
     {
@@ -1897,6 +1938,8 @@
       "from_s": 87.76,
       "to_s": 89.75,
       "fade_ms": 0,
+      "gobo": 0,
+      "speed": 0.12,
       "why": "…to the parked spot before bar 43."
     },
     {
@@ -1918,12 +1961,14 @@
       "tilt": 0.498,
       "colour": "#ffffff",
       "amount": 0.7,
-      "prism": 0,
+      "prism": 100,
       "strobe": 14,
       "from_s": 89.75,
       "to_s": 91.26,
       "fade_ms": 0,
       "strobe_on": "beat",
+      "gobo": 80,
+      "speed": 0.2,
       "why": "Bar 43: the head holds and strobes on the beat under the climb."
     },
     {
@@ -1957,7 +2002,9 @@
       "from_s": 91.76,
       "to_s": 97.76,
       "fade_ms": 800,
-      "why": "The resolve: red, dim, drifting slowly to the centre under the waves."
+      "gobo": 0,
+      "speed": 0.95,
+      "why": "The resolve: prism out, one clean red beam, motors at their smoothest -- the calm between the third drop and the climax."
     },
     {
       "effect": "beam",
@@ -1974,7 +2021,11 @@
       "to_s": 99.76,
       "fade_ms": 0,
       "strobe_on": "downbeat",
-      "why": "The climax: the pendulum at one bar a side, white prism at full, strobe pop on each downbeat -- the one place the head is the brightest thing in the room."
+      "gobo": 80,
+      "speed": 0.08,
+      "spin": 0.35,
+      "nod": 0.06,
+      "why": "The climax: everything the fixture has, and the only place it gets it. Prism on, flower gobo, motors at full speed, a strobe pop on each downbeat, a nod into every beat, and the colour wheel spinning free instead of sitting on white -- the one place the head is the brightest thing in the room."
     },
     {
       "effect": "strobe",
@@ -2003,6 +2054,10 @@
       "to_s": 101.76,
       "fade_ms": 0,
       "strobe_on": "downbeat",
+      "gobo": 80,
+      "speed": 0.08,
+      "spin": 0.35,
+      "nod": 0.06,
       "why": "…"
     },
     {
@@ -2033,6 +2088,10 @@
       "to_s": 102.25,
       "fade_ms": 0,
       "strobe_on": "downbeat",
+      "gobo": 80,
+      "speed": 0.08,
+      "spin": 0.35,
+      "nod": 0.06,
       "why": "…to the parked spot for the black beat."
     },
     {
@@ -2068,6 +2127,10 @@
       "to_s": 103.76,
       "fade_ms": 0,
       "strobe_on": "downbeat",
+      "gobo": 80,
+      "speed": 0.08,
+      "spin": 0.35,
+      "nod": 0.06,
       "why": "…"
     },
     {
@@ -2085,6 +2148,10 @@
       "to_s": 105.76,
       "fade_ms": 0,
       "strobe_on": "downbeat",
+      "gobo": 80,
+      "speed": 0.08,
+      "spin": 0.35,
+      "nod": 0.06,
       "why": "…"
     },
     {
@@ -2102,6 +2169,10 @@
       "to_s": 107.76,
       "fade_ms": 0,
       "strobe_on": "downbeat",
+      "gobo": 80,
+      "speed": 0.08,
+      "spin": 0.35,
+      "nod": 0.06,
       "why": "…"
     },
     {
@@ -2119,6 +2190,10 @@
       "to_s": 109.76,
       "fade_ms": 0,
       "strobe_on": "downbeat",
+      "gobo": 80,
+      "speed": 0.08,
+      "spin": 0.35,
+      "nod": 0.06,
       "why": "…to the centre for the come-down."
     },
     {
@@ -2147,6 +2222,8 @@
       "from_s": 109.76,
       "to_s": 116.76,
       "fade_ms": 600,
+      "gobo": 80,
+      "speed": 1,
       "why": "The outro: one wide, slow sweep of the room in amber -- seven seconds to the far left..."
     },
     {
@@ -2175,6 +2252,8 @@
       "from_s": 116.76,
       "to_s": 123.77,
       "fade_ms": 0,
+      "gobo": 80,
+      "speed": 1,
       "why": "...seven seconds across to the far right as the strings swell..."
     },
     {
@@ -2207,7 +2286,7 @@
       "pan": 0.9,
       "tilt": 0.62,
       "pan_to": 0.5,
-      "tilt_to": 0.7,
+      "tilt_to": 0.52,
       "colour": "#ff8a1a",
       "amount": 0.35,
       "prism": 0,
@@ -2215,7 +2294,9 @@
       "from_s": 123.77,
       "to_s": 127.23,
       "fade_ms": 0,
-      "why": "...and home to the centre, a touch brighter, for the last entrance. Off with the black beat at 127.23, and it stays off."
+      "gobo": 80,
+      "speed": 1,
+      "why": "...and home to the centre and up, the beam lifting towards vertical for the last entrance. Off with the black beat at 127.23, and it stays off."
     },
     {
       "effect": "blackout",

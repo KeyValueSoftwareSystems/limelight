@@ -89,6 +89,22 @@
    "default": "club16-2head.layout.json",
    "note": "A real nightclub, here to show what a venue-controlled rig looks like. We have no relationship with it and no access to its rig.",
    "rig_note": "We do not have OMNIA's fixture list. The rig shown is a stand-in so the catalogue renders; it is NOT what is hanging there."
+  },
+  {
+   "id": "ven_echostage",
+   "name": "Echostage",
+   "example": false,
+   "access": "public",
+   "logo": "ven_echostage.jpg",
+   "layouts": [
+    {
+     "name": "House rig",
+     "file": "club16-2head.layout.json"
+    }
+   ],
+   "default": "club16-2head.layout.json",
+   "note": "A real nightclub in Washington DC, here to show what a public venue entry looks like. We have no relationship with it and no access to its rig.",
+   "rig_note": "We do not have Echostage's fixture list. The rig shown is a stand-in so the catalogue renders; it is NOT what is hanging there."
   }
  ]
 }
