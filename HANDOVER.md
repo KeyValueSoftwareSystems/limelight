@@ -223,6 +223,31 @@ Read `portal/cue/author.py` alongside this.
 
 ---
 
+## 7a. Phrases — the show is composed per phrase, not per bar
+
+Amal's deepest criticism was that the show "feels reactive, not musically
+intelligent": brightness tracked loudness bar by bar, so it was a response
+function rather than a composition. A listener hears **phrases**, not bars.
+
+`author.py` now segments each section into 4-bar phrases, reads each phrase's
+direction as a unit (rises / falls / holds by comparing its first and last bar),
+and gives the whole phrase ONE idea:
+
+  rises  -> `build`,   level climbs 0.80 to 1.00 across the phrase, "opens out"
+  falls  -> `unbuild`, level falls 1.00 to 0.82,                    "closes down"
+  holds  -> `wave` when dense, `comet` when sparse, level near flat "travels across"
+
+The level of any bar comes from **its phrase's trajectory**, not from that bar's
+own energy, and a cue only fires at a phrase start or on a real moment. Inside a
+phrase the lights execute a plan instead of re-deciding.
+
+**Be honest about what this did and did not do.** It is structurally right and
+it is what he asked for, but the measurement did not move much: brightness
+correlated with bar loudness at r=+0.41 before and r=+0.37 after, and with the
+phrase plan at r=+0.43 both times. The chases and accents dominate the measured
+brightness, not the cue levels. If he says "reactive" again, the lever is
+probably the chase behaviour inside a phrase, not the phrase levels.
+
 ## 7b. The activity / fluctuation trade-off — read this before adding anything
 
 Amal's most persistent complaint is that the show "feels like voltage
@@ -246,15 +271,24 @@ opposite ends:
 ```
   accents   wobble   rises
      40      30.7%      54
-     20      17.3%      36     <- roughly where it sits now (30 accents, 21.7%)
+     30      21.7%      44
+     19      19.3%      38     <- where it sits now (3.6s spacing in author.py)
      13      16.5%      30
       0      12.3%      18
 ```
 
-Two things already tried that did NOT help: raising the chase floor to 0.75
-(29.7% vs 30.7%), and making chases conserve total output (40% -> 34%). The
-conservation is still in and is correct in principle — a travelling figure
-redistributes light rather than removing it — it just is not what dominates.
+Things already tried that did NOT help, so do not retry them:
+  - raising the chase floor to 0.75          (30.7% -> 29.7%, nothing)
+  - making chases conserve total output      (40% -> 34%; correct in principle,
+    kept, but not dominant)
+  - moving chases from hits back onto beats  (identical numbers — because a
+    conserving chase barely moves the rig mean, so neither the wobble nor the
+    regularity metric can observe it at all)
+  - softening the phrase trajectory depth    (31.5% -> 30.2%)
+
+That third one matters: **the aggregate metrics cannot see the chases.** If the
+complaint is about how the chase itself feels, these numbers will not show it
+and you need to look at frames or ask him.
 
 If he says fluctuation again, move **down** this curve (fewer accents, longer
 spacing in `author.py`'s accent loop). If he says lazy, move up. Do not reach

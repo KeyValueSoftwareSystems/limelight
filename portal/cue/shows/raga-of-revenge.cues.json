@@ -32,11 +32,11 @@
     "bar": 1
    },
    "fade": 0.15,
-   "why": "bar 1: strings leads, E 3.70, 1 hits, mode -0.31 - pitch in violet",
+   "why": "bars 1-4, the phrase opens out: strings leads, E 3.70, 1 hits, mode -0.31 - pitch in violet",
    "look": {
     "lamps": {
      "c": "violet",
-     "l": 0.25
+     "l": 0.24
     },
     "heads": {
      "c": "violet",
@@ -54,39 +54,7 @@
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true
-    }
-   ]
-  },
-  {
-   "id": 2,
-   "at": {
-    "bar": 2
-   },
-   "fade": 0.15,
-   "why": "bar 2: voices leads, E 3.38, 0 hits, mode -0.04 - pitch in violet",
-   "look": {
-    "lamps": {
-     "c": "violet",
-     "l": 0.25
-    },
-    "heads": {
-     "c": "violet",
-     "l": 0.17,
-     "pan": 0.5,
-     "tilt": 0.33
-    }
-   },
-   "chases": [
-    {
-     "on": "lamps",
-     "figure": "pitch",
-     "every": {
-      "notes": 1
-     },
-     "fill_beats": 1,
-     "low": 0.22,
-     "move_head": true
+     "move_head": false
     }
    ]
   },
@@ -99,13 +67,13 @@
    "look": {
     "lamps": {
      "c": "violet",
-     "l": 0.28
+     "l": 0.27
     },
     "heads": {
      "c": "violet",
      "l": 0.19,
      "pan": 0.5,
-     "tilt": 0.33
+     "tilt": 0.35
     }
    },
    "chases": [
@@ -124,7 +92,7 @@
    "why": "a 4-note run up the scale at 8 notes a second, 6.39s to 6.90s - the row travels with it"
   },
   {
-   "id": 2,
+   "id": 1,
    "at": {
     "second": 6.98
    },
@@ -133,13 +101,13 @@
    "look": {
     "lamps": {
      "c": "violet",
-     "l": 0.25
+     "l": 0.24
     },
     "heads": {
      "c": "violet",
      "l": 0.17,
      "pan": 0.5,
-     "tilt": 0.33
+     "tilt": 0.35
     }
    },
    "chases": [
@@ -151,7 +119,7 @@
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true
+     "move_head": false
     }
    ],
    "swell": {
@@ -161,7 +129,7 @@
    }
   },
   {
-   "id": 3,
+   "id": 2,
    "at": {
     "bar": 3
    },
@@ -170,7 +138,7 @@
    "look": {
     "lamps": {
      "c": "violet",
-     "l": 0.31
+     "l": 0.28
     }
    },
    "chase": {
@@ -183,7 +151,7 @@
    }
   },
   {
-   "id": 4,
+   "id": 3,
    "at": {
     "second": 8.49
    },
@@ -214,7 +182,7 @@
    "why": "the audio falls to 27% of its median for 0.16s - a real hole, so the room goes with it"
   },
   {
-   "id": 4,
+   "id": 3,
    "at": {
     "second": 9.497
    },
@@ -236,38 +204,6 @@
    }
   },
   {
-   "id": 5,
-   "at": {
-    "bar": 4
-   },
-   "fade": 0.15,
-   "why": "bar 4: drums leads, E 7.96, 3 hits, mode +0.57 - split in violet",
-   "look": {
-    "lamps": {
-     "c": "violet",
-     "l": 0.44
-    },
-    "heads": {
-     "c": "violet",
-     "l": 0.31,
-     "pan": 0.5,
-     "tilt": 0.32
-    }
-   },
-   "chases": [
-    {
-     "on": "lamps",
-     "figure": "split",
-     "every": {
-      "hits": 1
-     },
-     "fill_beats": 1,
-     "low": 0.5,
-     "move_head": false
-    }
-   ]
-  },
-  {
    "id": 0,
    "at": {
     "second": 11.73
@@ -275,20 +211,14 @@
    "fade": 0.5,
    "look": {
     "lamps": {
-     "c": "violet",
+     "c": "scarlet",
      "l": 0.18
-    },
-    "heads": {
-     "c": "violet",
-     "l": 0.13,
-     "pan": 0.5,
-     "tilt": 0.32
     }
    },
    "why": "two beats before the entrance at 13.8s the room draws back, so the arrival has somewhere to arrive from"
   },
   {
-   "id": 6,
+   "id": 4,
    "at": {
     "bar": 5
    },
@@ -296,8 +226,8 @@
    "why": "entrance at 13.8s - brass lead, E 5.92",
    "look": {
     "lamps": {
-     "c": "violet",
-     "l": 0.37
+     "c": "scarlet",
+     "l": 0.34
     }
    },
    "chase": {
@@ -323,14 +253,14 @@
    "fade": 0.12,
    "look": {
     "lamps": {
-     "c": "violet",
-     "l": 0.28
+     "c": "scarlet",
+     "l": 0.27
     },
     "heads": {
-     "c": "violet",
+     "c": "scarlet",
      "l": 0.19,
      "pan": 0.5,
-     "tilt": 0.33
+     "tilt": 0.35
     }
    },
    "chases": [
@@ -349,7 +279,7 @@
    "why": "a 5-note run up the scale at 13 notes a second, 13.64s to 14.03s - the row travels with it"
   },
   {
-   "id": 2,
+   "id": 1,
    "at": {
     "second": 14.114
    },
@@ -357,14 +287,14 @@
    "why": "the run lands; back to the look it left",
    "look": {
     "lamps": {
-     "c": "violet",
-     "l": 0.25
+     "c": "scarlet",
+     "l": 0.24
     },
     "heads": {
-     "c": "violet",
+     "c": "scarlet",
      "l": 0.17,
      "pan": 0.5,
-     "tilt": 0.33
+     "tilt": 0.35
     }
    },
    "chases": [
@@ -376,7 +306,7 @@
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true
+     "move_head": false
     }
    ]
   },
@@ -389,13 +319,13 @@
    "look": {
     "lamps": {
      "c": "violet",
-     "l": 0.28
+     "l": 0.27
     },
     "heads": {
      "c": "violet",
      "l": 0.19,
      "pan": 0.5,
-     "tilt": 0.33
+     "tilt": 0.35
     }
    },
    "chases": [
@@ -414,7 +344,7 @@
    "why": "a 7-note run down the scale at 7 notes a second, 17.02s to 18.05s - the row travels with it"
   },
   {
-   "id": 7,
+   "id": 5,
    "at": {
     "bar": 7
    },
@@ -423,7 +353,7 @@
    "look": {
     "lamps": {
      "c": "violet",
-     "l": 0.46
+     "l": 0.39
     }
    },
    "chase": {
@@ -442,7 +372,7 @@
    }
   },
   {
-   "id": 2,
+   "id": 1,
    "at": {
     "second": 18.133
    },
@@ -451,13 +381,13 @@
    "look": {
     "lamps": {
      "c": "violet",
-     "l": 0.25
+     "l": 0.24
     },
     "heads": {
      "c": "violet",
      "l": 0.17,
      "pan": 0.5,
-     "tilt": 0.33
+     "tilt": 0.35
     }
    },
    "chases": [
@@ -469,49 +399,12 @@
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true
+     "move_head": false
     }
    ]
   },
   {
-   "id": 8,
-   "at": {
-    "bar": 8
-   },
-   "fade": 0.6,
-   "why": "bar 8 (climbing): brass leads, E 7.28, 1 hits, mode +0.78 - converge in violet",
-   "look": {
-    "lamps": {
-     "c": "violet",
-     "l": 0.45
-    },
-    "heads": {
-     "c": "violet",
-     "l": 0.32,
-     "pan": 0.5,
-     "tilt": 0.32
-    }
-   },
-   "chases": [
-    {
-     "on": "lamps",
-     "figure": "converge",
-     "every": {
-      "beats": 2
-     },
-     "fill_beats": 2,
-     "low": 0.5,
-     "move_head": false
-    }
-   ],
-   "swell": {
-    "from": 0.701,
-    "to": 0.729,
-    "curve": 1.15
-   }
-  },
-  {
-   "id": 9,
+   "id": 6,
    "at": {
     "bar": 9
    },
@@ -520,7 +413,7 @@
    "look": {
     "lamps": {
      "c": "violet",
-     "l": 0.174
+     "l": 0.168
     },
     "heads": {
      "c": "amber",
@@ -539,13 +432,13 @@
    "look": {
     "lamps": {
      "c": "amber",
-     "l": 0.28
+     "l": 0.27
     },
     "heads": {
      "c": "amber",
      "l": 0.19,
      "pan": 0.5,
-     "tilt": 0.33
+     "tilt": 0.35
     }
    },
    "chases": [
@@ -564,24 +457,24 @@
    "why": "a 4-note run down the scale at 7 notes a second, 25.30s to 25.86s - the row travels with it"
   },
   {
-   "id": 10,
+   "id": 7,
    "at": {
     "bar": 11
    },
    "fade": 0.15,
-   "why": "bar 11: strings leads, E 10.09, 2 hits, mode +0.32 - pitch in oxblood against scarlet inside",
+   "why": "bars 11-14, the phrase closes down: strings leads, E 10.09, 2 hits, mode +0.32 - pitch in oxblood against scarlet inside",
    "look": {
     "outer": {
      "c": "violet",
-     "l": 0.5
+     "l": 0.37
     },
     "inner": {
      "c": "amber",
-     "l": 0.4
+     "l": 0.3
     },
     "heads": {
      "c": "amber",
-     "l": 0.35,
+     "l": 0.26,
      "pan": 0.5,
      "tilt": 0.36
     }
@@ -593,14 +486,14 @@
      "every": {
       "notes": 1
      },
-     "fill_beats": 2,
-     "low": 0.5,
-     "move_head": true
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": false
     }
    ]
   },
   {
-   "id": 2,
+   "id": 1,
    "at": {
     "second": 25.941
    },
@@ -609,13 +502,13 @@
    "look": {
     "lamps": {
      "c": "violet",
-     "l": 0.25
+     "l": 0.24
     },
     "heads": {
      "c": "violet",
      "l": 0.17,
      "pan": 0.5,
-     "tilt": 0.33
+     "tilt": 0.35
     }
    },
    "chases": [
@@ -627,39 +520,7 @@
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true
-    }
-   ]
-  },
-  {
-   "id": 11,
-   "at": {
-    "bar": 12
-   },
-   "fade": 0.15,
-   "why": "bar 12: voices leads, E 4.51, 0 hits, mode +0.32 - pitch in oxblood",
-   "look": {
-    "lamps": {
-     "c": "violet",
-     "l": 0.3
-    },
-    "heads": {
-     "c": "violet",
-     "l": 0.21,
-     "pan": 0.5,
-     "tilt": 0.31
-    }
-   },
-   "chases": [
-    {
-     "on": "lamps",
-     "figure": "pitch",
-     "every": {
-      "notes": 1
-     },
-     "fill_beats": 1,
-     "low": 0.22,
-     "move_head": true
+     "move_head": false
     }
    ]
   },
@@ -672,13 +533,13 @@
    "look": {
     "lamps": {
      "c": "violet",
-     "l": 0.28
+     "l": 0.27
     },
     "heads": {
      "c": "violet",
      "l": 0.19,
      "pan": 0.5,
-     "tilt": 0.33
+     "tilt": 0.35
     }
    },
    "chases": [
@@ -697,7 +558,7 @@
    "why": "a 4-note run up the scale at 14 notes a second, 30.23s to 30.51s - the row travels with it"
   },
   {
-   "id": 2,
+   "id": 1,
    "at": {
     "second": 30.587
    },
@@ -706,13 +567,13 @@
    "look": {
     "lamps": {
      "c": "violet",
-     "l": 0.25
+     "l": 0.24
     },
     "heads": {
      "c": "violet",
      "l": 0.17,
      "pan": 0.5,
-     "tilt": 0.33
+     "tilt": 0.35
     }
    },
    "chases": [
@@ -724,29 +585,25 @@
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true
+     "move_head": false
     }
    ]
   },
   {
-   "id": 12,
+   "id": 8,
    "at": {
     "bar": 14
    },
    "fade": 0.6,
-   "why": "bar 14 (climbing): brass leads, E 5.01, 0 hits, mode +0.77 - converge in saffron against violet inside",
+   "why": "bars 11-14, the phrase closes down: brass leads, E 5.01, 0 hits, mode +0.77 - unbuild in saffron",
    "look": {
-    "outer": {
+    "lamps": {
      "c": "violet",
-     "l": 0.33
-    },
-    "inner": {
-     "c": "violet",
-     "l": 0.26
+     "l": 0.3
     },
     "heads": {
-     "c": "violet",
-     "l": 0.23,
+     "c": "saffron",
+     "l": 0.21,
      "pan": 0.5,
      "tilt": 0.28
     }
@@ -754,7 +611,7 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "converge",
+     "figure": "unbuild",
      "every": {
       "beats": 2
      },
@@ -774,7 +631,7 @@
    "why": "the audio falls to 15% of its median for 0.46s - a real hole, so the room goes with it"
   },
   {
-   "id": 4,
+   "id": 3,
    "at": {
     "second": 33.599
    },
@@ -796,20 +653,20 @@
    }
   },
   {
-   "id": 13,
+   "id": 9,
    "at": {
     "bar": 15
    },
    "fade": 0.6,
-   "why": "bar 15 (climbing): guitars leads, E 5.92, 8 hits, mode +1.00 - build in oxblood",
+   "why": "bars 15-18, the phrase opens out: guitars leads, E 5.92, 8 hits, mode +1.00 - build in oxblood",
    "look": {
     "lamps": {
      "c": "violet",
-     "l": 0.37
+     "l": 0.32
     },
     "heads": {
-     "c": "oxblood",
-     "l": 0.26,
+     "c": "violet",
+     "l": 0.22,
      "pan": 0.5,
      "tilt": 0.37
     }
@@ -840,14 +697,14 @@
    "fade": 0.12,
    "look": {
     "lamps": {
-     "c": "oxblood",
-     "l": 0.28
+     "c": "violet",
+     "l": 0.27
     },
     "heads": {
-     "c": "oxblood",
+     "c": "violet",
      "l": 0.19,
      "pan": 0.5,
-     "tilt": 0.33
+     "tilt": 0.35
     }
    },
    "chases": [
@@ -866,7 +723,7 @@
    "why": "a 4-note run up the scale at 9 notes a second, 34.04s to 34.48s - the row travels with it"
   },
   {
-   "id": 2,
+   "id": 1,
    "at": {
     "second": 34.56
    },
@@ -874,14 +731,14 @@
    "why": "the run lands; back to the look it left",
    "look": {
     "lamps": {
-     "c": "oxblood",
-     "l": 0.25
+     "c": "violet",
+     "l": 0.24
     },
     "heads": {
-     "c": "oxblood",
+     "c": "violet",
      "l": 0.17,
      "pan": 0.5,
-     "tilt": 0.33
+     "tilt": 0.35
     }
    },
    "chases": [
@@ -893,7 +750,7 @@
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true
+     "move_head": false
     }
    ]
   },
@@ -906,13 +763,13 @@
    "look": {
     "lamps": {
      "c": "violet",
-     "l": 0.28
+     "l": 0.27
     },
     "heads": {
      "c": "violet",
      "l": 0.19,
      "pan": 0.5,
-     "tilt": 0.33
+     "tilt": 0.35
     }
    },
    "chases": [
@@ -931,24 +788,24 @@
    "why": "a 5-note run down the scale at 8 notes a second, 39.49s to 40.15s - the row travels with it"
   },
   {
-   "id": 14,
+   "id": 10,
    "at": {
     "bar": 18
    },
    "fade": 0.6,
-   "why": "bar 18 (climbing): guitars leads, E 7.58, 10 hits, mode +0.14 - build in oxblood against violet inside",
+   "why": "bars 15-18, the phrase opens out: guitars leads, E 7.58, 10 hits, mode +0.14 - build in oxblood against violet inside",
    "look": {
     "outer": {
      "c": "violet",
-     "l": 0.44
+     "l": 0.4
     },
     "inner": {
      "c": "violet",
-     "l": 0.35
+     "l": 0.32
     },
     "heads": {
      "c": "violet",
-     "l": 0.31,
+     "l": 0.28,
      "pan": 0.5,
      "tilt": 0.37
     }
@@ -972,7 +829,7 @@
    }
   },
   {
-   "id": 2,
+   "id": 1,
    "at": {
     "second": 40.23
    },
@@ -981,13 +838,13 @@
    "look": {
     "lamps": {
      "c": "violet",
-     "l": 0.25
+     "l": 0.24
     },
     "heads": {
      "c": "violet",
      "l": 0.17,
      "pan": 0.5,
-     "tilt": 0.33
+     "tilt": 0.35
     }
    },
    "chases": [
@@ -999,12 +856,12 @@
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true
+     "move_head": false
     }
    ]
   },
   {
-   "id": 15,
+   "id": 11,
    "at": {
     "second": 41.26
    },
@@ -1026,6 +883,43 @@
    }
   },
   {
+   "id": 12,
+   "at": {
+    "bar": 19
+   },
+   "fade": 0.6,
+   "why": "bars 19-22, the phrase opens out: guitars leads, E 7.01, 6 hits, mode -0.26 - build in oxblood",
+   "look": {
+    "lamps": {
+     "c": "violet",
+     "l": 0.4
+    },
+    "heads": {
+     "c": "oxblood",
+     "l": 0.28,
+     "pan": 0.5,
+     "tilt": 0.35
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "build",
+     "every": {
+      "beats": 2
+     },
+     "fill_beats": 1,
+     "low": 0.4,
+     "move_head": false
+    }
+   ],
+   "swell": {
+    "from": 0.919,
+    "to": 0.946,
+    "curve": 1.15
+   }
+  },
+  {
    "id": 0,
    "at": {
     "second": 42.984
@@ -1033,14 +927,14 @@
    "fade": 0.12,
    "look": {
     "lamps": {
-     "c": "violet",
-     "l": 0.28
+     "c": "oxblood",
+     "l": 0.27
     },
     "heads": {
-     "c": "violet",
+     "c": "oxblood",
      "l": 0.19,
      "pan": 0.5,
-     "tilt": 0.33
+     "tilt": 0.35
     }
    },
    "chases": [
@@ -1059,7 +953,7 @@
    "why": "a 4-note run up the scale at 6 notes a second, 42.98s to 43.61s - the row travels with it"
   },
   {
-   "id": 2,
+   "id": 1,
    "at": {
     "second": 43.691
    },
@@ -1067,14 +961,14 @@
    "why": "the run lands; back to the look it left",
    "look": {
     "lamps": {
-     "c": "violet",
-     "l": 0.25
+     "c": "oxblood",
+     "l": 0.24
     },
     "heads": {
-     "c": "violet",
+     "c": "oxblood",
      "l": 0.17,
      "pan": 0.5,
-     "tilt": 0.33
+     "tilt": 0.35
     }
    },
    "chases": [
@@ -1086,25 +980,25 @@
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true
+     "move_head": false
     }
    ]
   },
   {
-   "id": 16,
+   "id": 13,
    "at": {
     "bar": 21
    },
    "fade": 0.6,
-   "why": "bar 21 (climbing): guitars leads, E 8.94, 9 hits, mode -0.62 - cascade in oxblood",
+   "why": "bars 19-22, the phrase opens out: guitars leads, E 8.94, 9 hits, mode -0.62 - build in oxblood",
    "look": {
     "lamps": {
      "c": "violet",
-     "l": 0.51
+     "l": 0.47
     },
     "heads": {
      "c": "oxblood",
-     "l": 0.36,
+     "l": 0.33,
      "pan": 0.5,
      "tilt": 0.37
     }
@@ -1112,13 +1006,13 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "cascade",
+     "figure": "build",
      "every": {
       "beats": 2
      },
      "fill_beats": 2,
      "low": 0.4,
-     "move_head": true
+     "move_head": false
     }
    ],
    "swell": {
@@ -1128,20 +1022,20 @@
    }
   },
   {
-   "id": 17,
+   "id": 14,
    "at": {
     "bar": 22
    },
    "fade": 0.6,
-   "why": "bar 22 (climbing): guitars leads, E 12.39, 6 hits, mode -0.72 - converge in oxblood",
+   "why": "bars 22-25, the phrase closes down: guitars leads, E 12.39, 6 hits, mode -0.72 - unbuild in oxblood",
    "look": {
     "lamps": {
      "c": "violet",
-     "l": 0.64
+     "l": 0.58
     },
     "heads": {
      "c": "oxblood",
-     "l": 0.45,
+     "l": 0.41,
      "pan": 0.5,
      "tilt": 0.31
     }
@@ -1149,7 +1043,7 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "converge",
+     "figure": "unbuild",
      "every": {
       "beats": 2
      },
@@ -1169,14 +1063,14 @@
    "why": "the audio falls to 9% of its median for 0.56s - a real hole, so the room goes with it"
   },
   {
-   "id": 4,
+   "id": 3,
    "at": {
     "second": 48.437
    },
    "fade": 0.06,
    "look": {
     "lamps": {
-     "c": "ember",
+     "c": "violet",
      "l": 0.44
     }
    },
@@ -1198,14 +1092,14 @@
    "fade": 0.12,
    "look": {
     "lamps": {
-     "c": "ember",
-     "l": 0.28
+     "c": "violet",
+     "l": 0.27
     },
     "heads": {
-     "c": "ember",
+     "c": "violet",
      "l": 0.19,
      "pan": 0.5,
-     "tilt": 0.33
+     "tilt": 0.35
     }
    },
    "chases": [
@@ -1231,20 +1125,14 @@
    "fade": 0.5,
    "look": {
     "lamps": {
-     "c": "violet",
+     "c": "scarlet",
      "l": 0.08
-    },
-    "heads": {
-     "c": "violet",
-     "l": 0.05,
-     "pan": 0.5,
-     "tilt": 0.32
     }
    },
    "why": "two beats before the climax at 52.8s the room draws back, so the arrival has somewhere to arrive from"
   },
   {
-   "id": 2,
+   "id": 1,
    "at": {
     "second": 50.824
    },
@@ -1252,14 +1140,14 @@
    "why": "the run lands; back to the look it left",
    "look": {
     "lamps": {
-     "c": "violet",
-     "l": 0.25
+     "c": "scarlet",
+     "l": 0.24
     },
     "heads": {
-     "c": "violet",
+     "c": "scarlet",
      "l": 0.17,
      "pan": 0.5,
-     "tilt": 0.33
+     "tilt": 0.35
     }
    },
    "chases": [
@@ -1271,19 +1159,19 @@
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true
+     "move_head": false
     }
    ]
   },
   {
-   "id": 18,
+   "id": 15,
    "at": {
     "second": 51.26
    },
    "fade": 0.55,
    "look": {
     "lamps": {
-     "c": "violet",
+     "c": "scarlet",
      "l": 0.79
     }
    },
@@ -1303,7 +1191,7 @@
    }
   },
   {
-   "id": 19,
+   "id": 16,
    "at": {
     "bar": 24
    },
@@ -1312,7 +1200,7 @@
    "look": {
     "lamps": {
      "c": "scarlet",
-     "l": 0.98
+     "l": 0.79
     },
     "heads": {
      "c": "scarlet",
@@ -1331,61 +1219,20 @@
    }
   },
   {
-   "id": 20,
-   "at": {
-    "bar": 25
-   },
-   "fade": 0.15,
-   "why": "bar 25: drums leads, E 9.10, 5 hits, mode +0.06 - handover in ember against teal inside",
-   "look": {
-    "lamps": {
-     "c": "scarlet",
-     "l": 0.69
-    },
-    "heads": {
-     "c": "scarlet",
-     "l": 0.48,
-     "pan": 0.5,
-     "tilt": 0.36
-    }
-   },
-   "chases": [
-    {
-     "on": "lamps",
-     "figure": "handover",
-     "every": {
-      "hits": 2
-     },
-     "fill_beats": 2,
-     "low": 0.5,
-     "move_head": true
-    },
-    {
-     "on": "inner",
-     "figure": "hocket",
-     "every": {
-      "hits": 3
-     },
-     "low": 0.55,
-     "c": "teal"
-    }
-   ]
-  },
-  {
-   "id": 21,
+   "id": 17,
    "at": {
     "bar": 26
    },
-   "fade": 0.35,
-   "why": "bar 26: drums leads, E 9.80, 10 hits, mode +0.46 - alternate in ember against teal inside",
+   "fade": 0.15,
+   "why": "bars 26-29, the phrase travels across: drums leads, E 9.80, 10 hits, mode +0.46 - wave in ember against teal inside",
    "look": {
     "lamps": {
-     "c": "ember",
-     "l": 0.57
+     "c": "violet",
+     "l": 0.49
     },
     "heads": {
      "c": "ember",
-     "l": 0.4,
+     "l": 0.34,
      "pan": 0.5,
      "tilt": 0.38
     }
@@ -1393,13 +1240,13 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "alternate",
+     "figure": "wave",
      "every": {
       "hits": 3
      },
      "fill_beats": 2,
      "low": 0.4,
-     "move_head": false
+     "move_head": true
     },
     {
      "on": "inner",
@@ -1420,14 +1267,14 @@
    "fade": 0.12,
    "look": {
     "lamps": {
-     "c": "ember",
-     "l": 0.28
+     "c": "violet",
+     "l": 0.27
     },
     "heads": {
      "c": "violet",
      "l": 0.19,
      "pan": 0.5,
-     "tilt": 0.33
+     "tilt": 0.35
     }
    },
    "chases": [
@@ -1446,7 +1293,7 @@
    "why": "a 4-note run up the scale at 10 notes a second, 59.95s to 60.35s - the row travels with it"
   },
   {
-   "id": 2,
+   "id": 1,
    "at": {
     "second": 60.432
    },
@@ -1454,14 +1301,14 @@
    "why": "the run lands; back to the look it left",
    "look": {
     "lamps": {
-     "c": "ember",
-     "l": 0.25
+     "c": "violet",
+     "l": 0.24
     },
     "heads": {
      "c": "violet",
      "l": 0.17,
      "pan": 0.5,
-     "tilt": 0.33
+     "tilt": 0.35
     }
    },
    "chases": [
@@ -1473,19 +1320,19 @@
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true
+     "move_head": false
     }
    ]
   },
   {
-   "id": 22,
+   "id": 18,
    "at": {
     "second": 63.26
    },
    "fade": 0.55,
    "look": {
     "lamps": {
-     "c": "ember",
+     "c": "violet",
      "l": 0.57
     }
    },
@@ -1500,6 +1347,42 @@
    }
   },
   {
+   "id": 19,
+   "at": {
+    "bar": 30
+   },
+   "fade": 0.35,
+   "why": "bars 30-33, the phrase travels across: drums leads, E 7.57, 3 hits, mode -0.50 - wave in ember against ember inside",
+   "look": {
+    "outer": {
+     "c": "violet",
+     "l": 0.46
+    },
+    "inner": {
+     "c": "violet",
+     "l": 0.37
+    },
+    "heads": {
+     "c": "violet",
+     "l": 0.32,
+     "pan": 0.5,
+     "tilt": 0.34
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "wave",
+     "every": {
+      "hits": 1
+     },
+     "fill_beats": 2,
+     "low": 0.5,
+     "move_head": true
+    }
+   ]
+  },
+  {
    "id": 0,
    "at": {
     "second": 64.105
@@ -1507,14 +1390,14 @@
    "fade": 0.12,
    "look": {
     "lamps": {
-     "c": "ember",
-     "l": 0.28
+     "c": "violet",
+     "l": 0.27
     },
     "heads": {
      "c": "violet",
      "l": 0.19,
      "pan": 0.5,
-     "tilt": 0.33
+     "tilt": 0.35
     }
    },
    "chases": [
@@ -1533,7 +1416,7 @@
    "why": "a 6-note run up the scale at 7 notes a second, 64.11s to 64.94s - the row travels with it"
   },
   {
-   "id": 2,
+   "id": 1,
    "at": {
     "second": 65.021
    },
@@ -1541,14 +1424,14 @@
    "why": "the run lands; back to the look it left",
    "look": {
     "lamps": {
-     "c": "ember",
-     "l": 0.25
+     "c": "violet",
+     "l": 0.24
     },
     "heads": {
      "c": "violet",
      "l": 0.17,
      "pan": 0.5,
-     "tilt": 0.33
+     "tilt": 0.35
     }
    },
    "chases": [
@@ -1560,55 +1443,19 @@
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true
-    }
-   ]
-  },
-  {
-   "id": 23,
-   "at": {
-    "bar": 33
-   },
-   "fade": 0.35,
-   "why": "bar 33: drums leads, E 8.12, 3 hits, mode +0.05 - pairs in ember against crimson inside",
-   "look": {
-    "outer": {
-     "c": "ember",
-     "l": 0.52
-    },
-    "inner": {
-     "c": "crimson",
-     "l": 0.42
-    },
-    "heads": {
-     "c": "crimson",
-     "l": 0.36,
-     "pan": 0.5,
-     "tilt": 0.38
-    }
-   },
-   "chases": [
-    {
-     "on": "lamps",
-     "figure": "pairs",
-     "every": {
-      "hits": 1
-     },
-     "fill_beats": 2,
-     "low": 0.5,
      "move_head": false
     }
    ]
   },
   {
-   "id": 24,
+   "id": 20,
    "at": {
     "second": 69.76
    },
    "fade": 0.55,
    "look": {
     "lamps": {
-     "c": "crimson",
+     "c": "violet",
      "l": 0.61
     }
    },
@@ -1630,20 +1477,14 @@
    "fade": 0.5,
    "look": {
     "lamps": {
-     "c": "crimson",
+     "c": "scarlet",
      "l": 0.05
-    },
-    "heads": {
-     "c": "crimson",
-     "l": 0.05,
-     "pan": 0.5,
-     "tilt": 0.32
     }
    },
    "why": "two beats before the entrance at 72.2s the room draws back, so the arrival has somewhere to arrive from"
   },
   {
-   "id": 25,
+   "id": 21,
    "at": {
     "bar": 34
    },
@@ -1651,8 +1492,8 @@
    "why": "entrance at 72.2s - drums lead, E 8.31",
    "look": {
     "lamps": {
-     "c": "crimson",
-     "l": 0.63
+     "c": "scarlet",
+     "l": 0.59
     }
    },
    "chase": {
@@ -1666,24 +1507,24 @@
    }
   },
   {
-   "id": 26,
+   "id": 22,
    "at": {
     "bar": 38
    },
    "fade": 0.6,
-   "why": "bar 38 (climbing): voices leads, E 6.26, 4 hits, mode +0.17 - build in ember against ember inside",
+   "why": "bars 38-39, the phrase travels across: voices leads, E 6.26, 4 hits, mode +0.17 - comet in ember against ember inside",
    "look": {
     "outer": {
-     "c": "ember",
-     "l": 0.46
+     "c": "violet",
+     "l": 0.44
     },
     "inner": {
      "c": "ember",
-     "l": 0.37
+     "l": 0.35
     },
     "heads": {
      "c": "ember",
-     "l": 0.32,
+     "l": 0.31,
      "pan": 0.5,
      "tilt": 0.32
     }
@@ -1691,13 +1532,13 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "build",
+     "figure": "comet",
      "every": {
       "beats": 2
      },
-     "fill_beats": 2,
+     "fill_beats": 1,
      "low": 0.5,
-     "move_head": false
+     "move_head": true
     }
    ],
    "swell": {
@@ -1707,7 +1548,7 @@
    }
   },
   {
-   "id": 27,
+   "id": 23,
    "at": {
     "bar": 39
    },
@@ -1716,7 +1557,7 @@
    "look": {
     "lamps": {
      "c": "ember",
-     "l": 0.59
+     "l": 0.56
     }
    },
    "chase": {
@@ -1734,55 +1575,14 @@
    }
   },
   {
-   "id": 28,
-   "at": {
-    "bar": 40
-   },
-   "fade": 0.6,
-   "why": "bar 40 (climbing): drums leads, E 8.02, 5 hits, mode +0.47 - converge in ember against ember inside",
-   "look": {
-    "outer": {
-     "c": "ember",
-     "l": 0.6
-    },
-    "inner": {
-     "c": "ember",
-     "l": 0.48
-    },
-    "heads": {
-     "c": "ember",
-     "l": 0.42,
-     "pan": 0.5,
-     "tilt": 0.37
-    }
-   },
-   "chases": [
-    {
-     "on": "lamps",
-     "figure": "converge",
-     "every": {
-      "beats": 2
-     },
-     "fill_beats": 2,
-     "low": 0.5,
-     "move_head": false
-    }
-   ],
-   "swell": {
-    "from": 0.678,
-    "to": 0.708,
-    "curve": 1.15
-   }
-  },
-  {
-   "id": 29,
+   "id": 24,
    "at": {
     "second": 85.76
    },
    "fade": 0.55,
    "look": {
     "lamps": {
-     "c": "ember",
+     "c": "violet",
      "l": 0.62
     }
    },
@@ -1797,6 +1597,47 @@
    }
   },
   {
+   "id": 25,
+   "at": {
+    "bar": 43
+   },
+   "fade": 0.6,
+   "why": "bars 43-46, the phrase travels across: drums leads, E 8.35, 3 hits, mode +1.00 - wave in ember against ember inside",
+   "look": {
+    "outer": {
+     "c": "violet",
+     "l": 0.59
+    },
+    "inner": {
+     "c": "violet",
+     "l": 0.47
+    },
+    "heads": {
+     "c": "violet",
+     "l": 0.41,
+     "pan": 0.5,
+     "tilt": 0.39
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "wave",
+     "every": {
+      "beats": 2
+     },
+     "fill_beats": 2,
+     "low": 0.5,
+     "move_head": true
+    }
+   ],
+   "swell": {
+    "from": 0.766,
+    "to": 0.795,
+    "curve": 1.15
+   }
+  },
+  {
    "id": 0,
    "at": {
     "second": 90.4
@@ -1804,14 +1645,8 @@
    "fade": 0.5,
    "look": {
     "lamps": {
-     "c": "violet",
+     "c": "scarlet",
      "l": 0.05
-    },
-    "heads": {
-     "c": "violet",
-     "l": 0.05,
-     "pan": 0.5,
-     "tilt": 0.32
     }
    },
    "why": "two beats before the peak at 92.5s the room draws back, so the arrival has somewhere to arrive from",
@@ -1822,7 +1657,7 @@
    }
   },
   {
-   "id": 30,
+   "id": 26,
    "at": {
     "bar": 44
    },
@@ -1850,24 +1685,24 @@
    }
   },
   {
-   "id": 31,
+   "id": 27,
    "at": {
     "bar": 47
    },
    "fade": 0.6,
-   "why": "bar 47 (climbing): keys leads, E 9.49, 1 hits, mode +0.50 - build in ember against scarlet inside",
+   "why": "bars 47-50, the phrase opens out: keys leads, E 9.49, 1 hits, mode +0.50 - build in ember against scarlet inside",
    "look": {
     "outer": {
-     "c": "ember",
-     "l": 0.64
+     "c": "violet",
+     "l": 0.56
     },
     "inner": {
      "c": "scarlet",
-     "l": 0.51
+     "l": 0.45
     },
     "heads": {
      "c": "scarlet",
-     "l": 0.45,
+     "l": 0.39,
      "pan": 0.5,
      "tilt": 0.31
     }
@@ -1898,14 +1733,14 @@
    "fade": 0.12,
    "look": {
     "lamps": {
-     "c": "ember",
-     "l": 0.28
+     "c": "scarlet",
+     "l": 0.27
     },
     "heads": {
      "c": "scarlet",
      "l": 0.19,
      "pan": 0.5,
-     "tilt": 0.33
+     "tilt": 0.35
     }
    },
    "chases": [
@@ -1924,7 +1759,7 @@
    "why": "a 4-note run up the scale at 7 notes a second, 98.78s to 99.39s - the row travels with it"
   },
   {
-   "id": 2,
+   "id": 1,
    "at": {
     "second": 99.468
    },
@@ -1932,14 +1767,14 @@
    "why": "the run lands; back to the look it left",
    "look": {
     "lamps": {
-     "c": "ember",
-     "l": 0.25
+     "c": "scarlet",
+     "l": 0.24
     },
     "heads": {
      "c": "scarlet",
      "l": 0.17,
      "pan": 0.5,
-     "tilt": 0.33
+     "tilt": 0.35
     }
    },
    "chases": [
@@ -1951,7 +1786,7 @@
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true
+     "move_head": false
     }
    ],
    "swell": {
@@ -1961,7 +1796,7 @@
    }
   },
   {
-   "id": 32,
+   "id": 28,
    "at": {
     "bar": 48
    },
@@ -1969,8 +1804,8 @@
    "why": "build at 101.2s, E 10.18 - one lamp added at a time",
    "look": {
     "lamps": {
-     "c": "ember",
-     "l": 0.65
+     "c": "scarlet",
+     "l": 0.61
     }
    },
    "chase": {
@@ -1988,32 +1823,32 @@
    }
   },
   {
-   "id": 33,
+   "id": 29,
    "at": {
-    "bar": 49
+    "bar": 51
    },
    "fade": 0.6,
-   "why": "bar 49 (climbing): keys leads, E 12.20, 4 hits, mode +0.78 - converge in ember against teal inside",
+   "why": "bars 51-52, the phrase closes down: drums leads, E 12.79, 3 hits, mode +0.83 - unbuild in ember against saffron inside",
    "look": {
     "outer": {
-     "c": "ember",
-     "l": 0.7
+     "c": "violet",
+     "l": 0.61
     },
     "inner": {
-     "c": "teal",
-     "l": 0.56
+     "c": "saffron",
+     "l": 0.49
     },
     "heads": {
-     "c": "teal",
-     "l": 0.49,
+     "c": "saffron",
+     "l": 0.43,
      "pan": 0.5,
-     "tilt": 0.43
+     "tilt": 0.39
     }
    },
    "chases": [
     {
      "on": "lamps",
-     "figure": "converge",
+     "figure": "unbuild",
      "every": {
       "beats": 2
      },
@@ -2023,82 +1858,13 @@
     }
    ],
    "swell": {
-    "from": 0.942,
-    "to": 0.971,
-    "curve": 1.15
-   }
-  },
-  {
-   "id": 34,
-   "at": {
-    "bar": 50
-   },
-   "fade": 0.6,
-   "why": "bar 50 (climbing): drums leads, E 11.37, 4 hits, mode +0.76 - build in ember",
-   "look": {
-    "lamps": {
-     "c": "ember",
-     "l": 0.64
-    },
-    "heads": {
-     "c": "ember",
-     "l": 0.45,
-     "pan": 0.5,
-     "tilt": 0.36
-    }
-   },
-   "chases": [
-    {
-     "on": "lamps",
-     "figure": "build",
-     "every": {
-      "beats": 2
-     },
-     "fill_beats": 2,
-     "low": 0.5,
-     "move_head": false
-    }
-   ],
-   "swell": {
-    "from": 0.968,
+    "from": 1.0,
     "to": 1.0,
     "curve": 1.15
    }
   },
   {
-   "id": 35,
-   "at": {
-    "bar": 52
-   },
-   "fade": 0.35,
-   "why": "bar 52: drums leads, E 9.66, 3 hits, mode +0.85 - handover in ember",
-   "look": {
-    "lamps": {
-     "c": "ember",
-     "l": 0.53
-    },
-    "heads": {
-     "c": "ember",
-     "l": 0.37,
-     "pan": 0.5,
-     "tilt": 0.35
-    }
-   },
-   "chases": [
-    {
-     "on": "lamps",
-     "figure": "handover",
-     "every": {
-      "hits": 1
-     },
-     "fill_beats": 2,
-     "low": 0.5,
-     "move_head": true
-    }
-   ]
-  },
-  {
-   "id": 36,
+   "id": 30,
    "at": {
     "bar": 53
    },
@@ -2107,7 +1873,7 @@
    "look": {
     "inner": {
      "c": "scarlet",
-     "l": 0.231
+     "l": 0.18
     }
    }
   },
@@ -2120,13 +1886,13 @@
    "look": {
     "lamps": {
      "c": "scarlet",
-     "l": 0.28
+     "l": 0.27
     },
     "heads": {
      "c": "scarlet",
      "l": 0.19,
      "pan": 0.5,
-     "tilt": 0.33
+     "tilt": 0.35
     }
    },
    "chases": [
@@ -2145,7 +1911,7 @@
    "why": "a 4-note run down the scale at 16 notes a second, 110.04s to 110.30s - the row travels with it"
   },
   {
-   "id": 2,
+   "id": 1,
    "at": {
     "second": 110.376
    },
@@ -2154,13 +1920,13 @@
    "look": {
     "lamps": {
      "c": "scarlet",
-     "l": 0.25
+     "l": 0.24
     },
     "heads": {
      "c": "scarlet",
      "l": 0.17,
      "pan": 0.5,
-     "tilt": 0.33
+     "tilt": 0.35
     }
    },
    "chases": [
@@ -2172,7 +1938,7 @@
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true
+     "move_head": false
     }
    ]
   },
@@ -2186,7 +1952,7 @@
    "why": "the audio falls to 16% of its median for 1.14s - a real hole, so the room goes with it"
   },
   {
-   "id": 37,
+   "id": 31,
    "at": {
     "bar": 54
    },
@@ -2195,7 +1961,7 @@
    "look": {}
   },
   {
-   "id": 4,
+   "id": 3,
    "at": {
     "second": 111.99
    },
@@ -2226,7 +1992,7 @@
    "why": "the audio falls to 1% of its median for 0.84s - a real hole, so the room goes with it"
   },
   {
-   "id": 4,
+   "id": 3,
    "at": {
     "second": 113.546
    },
@@ -2248,20 +2014,20 @@
    }
   },
   {
-   "id": 38,
+   "id": 32,
    "at": {
     "bar": 55
    },
    "fade": 0.15,
-   "why": "bar 55: guitars leads, E 7.45, 1 hits, mode +0.55 - pitch in scarlet",
+   "why": "bars 53-56, the phrase opens out: guitars leads, E 7.45, 1 hits, mode +0.55 - pitch in scarlet",
    "look": {
     "lamps": {
      "c": "violet",
-     "l": 0.39
+     "l": 0.36
     },
     "heads": {
      "c": "violet",
-     "l": 0.27,
+     "l": 0.25,
      "pan": 0.5,
      "tilt": 0.34
     }
@@ -2274,7 +2040,7 @@
       "notes": 1
      },
      "fill_beats": 1,
-     "low": 0.5,
+     "low": 0.22,
      "move_head": false
     }
    ]
@@ -2288,13 +2054,13 @@
    "look": {
     "lamps": {
      "c": "violet",
-     "l": 0.28
+     "l": 0.27
     },
     "heads": {
      "c": "violet",
      "l": 0.19,
      "pan": 0.5,
-     "tilt": 0.33
+     "tilt": 0.35
     }
    },
    "chases": [
@@ -2313,7 +2079,7 @@
    "why": "a 4-note run up the scale at 16 notes a second, 113.84s to 114.09s - the row travels with it"
   },
   {
-   "id": 2,
+   "id": 1,
    "at": {
     "second": 114.175
    },
@@ -2322,13 +2088,13 @@
    "look": {
     "lamps": {
      "c": "violet",
-     "l": 0.25
+     "l": 0.24
     },
     "heads": {
      "c": "violet",
      "l": 0.17,
      "pan": 0.5,
-     "tilt": 0.33
+     "tilt": 0.35
     }
    },
    "chases": [
@@ -2340,65 +2106,25 @@
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true
-    }
-   ]
-  },
-  {
-   "id": 39,
-   "at": {
-    "bar": 56
-   },
-   "fade": 0.35,
-   "why": "bar 56: guitars leads, E 9.22, 4 hits, mode +0.55 - pitch in scarlet against violet inside",
-   "look": {
-    "outer": {
-     "c": "violet",
-     "l": 0.43
-    },
-    "inner": {
-     "c": "violet",
-     "l": 0.34
-    },
-    "heads": {
-     "c": "violet",
-     "l": 0.3,
-     "pan": 0.5,
-     "tilt": 0.36
-    }
-   },
-   "chases": [
-    {
-     "on": "lamps",
-     "figure": "pitch",
-     "every": {
-      "notes": 1
-     },
-     "fill_beats": 1,
-     "low": 0.5,
      "move_head": false
     }
    ]
   },
   {
-   "id": 40,
+   "id": 33,
    "at": {
     "bar": 57
    },
    "fade": 0.35,
-   "why": "bar 57: guitars leads, E 6.44, 3 hits, mode +0.55 - pitch in scarlet against violet inside",
+   "why": "bars 57-60, the phrase opens out: guitars leads, E 6.44, 3 hits, mode +0.55 - pitch in scarlet",
    "look": {
-    "outer": {
+    "lamps": {
      "c": "violet",
-     "l": 0.32
-    },
-    "inner": {
-     "c": "violet",
-     "l": 0.26
+     "l": 0.29
     },
     "heads": {
-     "c": "violet",
-     "l": 0.22,
+     "c": "scarlet",
+     "l": 0.2,
      "pan": 0.5,
      "tilt": 0.36
     }
@@ -2424,14 +2150,14 @@
    "fade": 0.12,
    "look": {
     "lamps": {
-     "c": "violet",
-     "l": 0.28
+     "c": "scarlet",
+     "l": 0.27
     },
     "heads": {
-     "c": "violet",
+     "c": "scarlet",
      "l": 0.19,
      "pan": 0.5,
-     "tilt": 0.33
+     "tilt": 0.35
     }
    },
    "chases": [
@@ -2450,7 +2176,7 @@
    "why": "a 4-note run up the scale at 8 notes a second, 118.96s to 119.47s - the row travels with it"
   },
   {
-   "id": 2,
+   "id": 1,
    "at": {
     "second": 119.554
    },
@@ -2458,14 +2184,14 @@
    "why": "the run lands; back to the look it left",
    "look": {
     "lamps": {
-     "c": "violet",
-     "l": 0.25
+     "c": "scarlet",
+     "l": 0.24
     },
     "heads": {
-     "c": "violet",
+     "c": "scarlet",
      "l": 0.17,
      "pan": 0.5,
-     "tilt": 0.33
+     "tilt": 0.35
     }
    },
    "chases": [
@@ -2477,12 +2203,12 @@
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true
+     "move_head": false
     }
    ]
   },
   {
-   "id": 41,
+   "id": 34,
    "at": {
     "bar": 58
    },
@@ -2491,7 +2217,7 @@
    "look": {
     "lamps": {
      "c": "indigo",
-     "l": 0.33
+     "l": 0.32
     }
    },
    "chase": {
@@ -2514,18 +2240,12 @@
     "lamps": {
      "c": "indigo",
      "l": 0.05
-    },
-    "heads": {
-     "c": "indigo",
-     "l": 0.05,
-     "pan": 0.5,
-     "tilt": 0.32
     }
    },
    "why": "two beats before the entrance at 123.8s the room draws back, so the arrival has somewhere to arrive from"
   },
   {
-   "id": 42,
+   "id": 35,
    "at": {
     "second": 121.78
    },
@@ -2547,7 +2267,7 @@
    }
   },
   {
-   "id": 43,
+   "id": 36,
    "at": {
     "bar": 60
    },
@@ -2556,7 +2276,7 @@
    "look": {
     "lamps": {
      "c": "indigo",
-     "l": 0.51
+     "l": 0.48
     }
    },
    "chase": {
@@ -2570,7 +2290,7 @@
    }
   },
   {
-   "id": 44,
+   "id": 37,
    "at": {
     "bar": 61
    },
@@ -2579,7 +2299,7 @@
    "look": {
     "lamps": {
      "c": "violet",
-     "l": 0.23
+     "l": 0.16
     }
    },
    "chase": {
@@ -2602,28 +2322,28 @@
    "why": "the audio falls to 0% of its median for 4.25s - a real hole, so the room goes with it"
   },
   {
-   "id": 45,
+   "id": 38,
    "at": {
-    "bar": 62
+    "bar": 63
    },
    "fade": 0.15,
-   "why": "bar 62: voices leads, E 0.18, 0 hits, mode +0.84 - bounce in scarlet",
+   "why": "bars 63-63, the phrase travels across: voices leads, E 0.00, 0 hits, mode +0.84 - comet in oxblood",
    "look": {
     "lamps": {
      "c": "violet",
-     "l": 0.06
+     "l": 0.05
     },
     "heads": {
      "c": "violet",
-     "l": 0.04,
+     "l": 0.03,
      "pan": 0.5,
-     "tilt": 0.33
+     "tilt": 0.42
     }
    },
    "chases": [
     {
      "on": "lamps",
-     "figure": "bounce",
+     "figure": "comet",
      "every": {
       "hits": 2
      },
@@ -2634,7 +2354,7 @@
    ]
   },
   {
-   "id": 4,
+   "id": 3,
    "at": {
     "second": 131.286
    },
@@ -2672,21 +2392,7 @@
    "c": "saffron"
   },
   {
-   "t": 38.499,
-   "l": 0.99,
-   "decay": 0.2,
-   "on": "lamps",
-   "c": "bone"
-  },
-  {
    "t": 40.496,
-   "l": 0.96,
-   "decay": 0.15,
-   "on": "outer",
-   "c": "saffron"
-  },
-  {
-   "t": 42.493,
    "l": 0.96,
    "decay": 0.15,
    "on": "inner",
@@ -2707,36 +2413,22 @@
    "c": "saffron"
   },
   {
-   "t": 53.801,
-   "l": 0.78,
-   "decay": 0.15,
-   "on": "outer",
-   "c": "saffron"
-  },
-  {
    "t": 55.798,
    "l": 0.81,
    "decay": 0.15,
-   "on": "inner",
+   "on": "outer",
    "c": "saffron"
   },
   {
    "t": 60.79,
    "l": 0.71,
    "decay": 0.15,
-   "on": "outer",
+   "on": "inner",
    "c": "saffron"
   },
   {
    "t": 64.482,
    "l": 0.81,
-   "decay": 0.15,
-   "on": "inner",
-   "c": "saffron"
-  },
-  {
-   "t": 66.804,
-   "l": 0.71,
    "decay": 0.15,
    "on": "outer",
    "c": "saffron"
@@ -2749,24 +2441,10 @@
    "c": "saffron"
   },
   {
-   "t": 72.005,
-   "l": 0.76,
-   "decay": 0.15,
-   "on": "outer",
-   "c": "saffron"
-  },
-  {
    "t": 77.787,
    "l": 0.71,
    "decay": 0.15,
-   "on": "inner",
-   "c": "saffron"
-  },
-  {
-   "t": 80.48,
-   "l": 0.61,
-   "decay": 0.2,
-   "on": "lamps",
+   "on": "outer",
    "c": "saffron"
   },
   {
@@ -2791,20 +2469,6 @@
    "c": "saffron"
   },
   {
-   "t": 92.508,
-   "l": 0.78,
-   "decay": 0.15,
-   "on": "outer",
-   "c": "saffron"
-  },
-  {
-   "t": 94.296,
-   "l": 0.82,
-   "decay": 0.15,
-   "on": "inner",
-   "c": "saffron"
-  },
-  {
    "t": 96.479,
    "l": 0.86,
    "decay": 0.15,
@@ -2812,22 +2476,8 @@
    "c": "saffron"
   },
   {
-   "t": 98.801,
-   "l": 0.91,
-   "decay": 0.15,
-   "on": "inner",
-   "c": "saffron"
-  },
-  {
    "t": 100.798,
    "l": 0.95,
-   "decay": 0.15,
-   "on": "outer",
-   "c": "saffron"
-  },
-  {
-   "t": 102.795,
-   "l": 0.98,
    "decay": 0.15,
    "on": "inner",
    "c": "saffron"
@@ -2854,18 +2504,11 @@
    "c": "saffron"
   },
   {
-   "t": 120.837,
-   "l": 0.82,
-   "decay": 0.15,
-   "on": "inner",
-   "c": "saffron"
-  },
-  {
-   "t": 124.482,
-   "l": 0.88,
+   "t": 121.812,
+   "l": 0.93,
    "decay": 0.2,
    "on": "lamps",
-   "c": "saffron"
+   "c": "bone"
   }
  ]
 }

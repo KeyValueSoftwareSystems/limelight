@@ -344,6 +344,46 @@ def author(song, out_path=None):
 
     sig_colour = {}
 
+    phrases = []
+    for sx in sections:
+        bars_in = [rr for rr in rows if sx["start"] - step <= rr["t"] < sx["end"]]
+        if not bars_in:
+            continue
+        size = 4 if len(bars_in) >= 4 else max(1, len(bars_in))
+        for q in range(0, len(bars_in), size):
+            grp = bars_in[q:q + size]
+            if not grp:
+                continue
+            e0, e1 = grp[0]["E"], grp[-1]["E"]
+            em = sum(x["E"] for x in grp) / len(grp)
+            if len(grp) < 2:
+                d = "holds"
+            elif e1 > e0 * 1.15:
+                d = "rises"
+            elif e1 < e0 * 0.87:
+                d = "falls"
+            else:
+                d = "holds"
+            dens = sum(1 for t, i in hits if grp[0]["t"] <= t < grp[-1]["end"] and i >= 0.28)
+            phrases.append({"bars": [x["bar"] for x in grp], "dir": d, "E": em,
+                            "t": grp[0]["t"], "end": grp[-1]["end"],
+                            "dens": dens / max(1, len(grp)),
+                            "label": sx.get("label", "?")})
+    phrase_of = {}
+    for pi, ph in enumerate(phrases):
+        IDEA = {
+            "rises": ("build", 0.80, 1.00, "opens out"),
+            "falls": ("unbuild", 1.00, 0.82, "closes down"),
+            "holds": ("wave", 0.92, 0.98, "travels across"),
+        }
+        fig, a0, a1, word = IDEA[ph["dir"]]
+        if ph["dir"] == "holds":
+            fig = "wave" if ph["dens"] >= 4 else "comet"
+        ph["fig"] = fig
+        ph["a0"], ph["a1"], ph["word"] = a0, a1, word
+        for k, b in enumerate(ph["bars"]):
+            phrase_of[b] = (pi, k, len(ph["bars"]))
+
     rising = set()
     for k in range(len(rows)):
         run = 0
@@ -379,11 +419,19 @@ def author(song, out_path=None):
             top_fam = lead if challenger > incumbent * 1.30 else held_fam
         held_fam = top_fam
         fam_changed = top_fam != prev_fam
-        e = r["E"] / Emax
-        level = round(min(0.97, (0.12 + 0.80 * (e**0.8)) * arc(r["t"])), 2)
+        pi, pk, pn = phrase_of.get(bar, (None, 0, 1))
+        ph = phrases[pi] if pi is not None else None
+        if ph is not None:
+            band = (0.12 + 0.80 * ((ph["E"] / Emax) ** 0.8)) * arc(ph["t"])
+            pos = pk / max(1, pn - 1) if pn > 1 else 1.0
+            level = round(min(0.97, band * (ph["a0"] + (ph["a1"] - ph["a0"]) * pos)), 2)
+        else:
+            e = r["E"] / Emax
+            level = round(min(0.97, (0.12 + 0.80 * (e**0.8)) * arc(r["t"])), 2)
 
         is_edge = any(abs(s["start"] - r["t"]) < step for s in sections)
-        want = bool(kind) or fam_changed or churn >= 7 or bar == 1
+        phrase_start = ph is not None and pk == 0
+        want = bool(kind) or phrase_start or bar == 1
         if not want and abs(level - prev_level) < 0.14:
             continue
 
@@ -521,7 +569,7 @@ def author(song, out_path=None):
             calm = ["sweep", "bounce", "comet", "converge"]
             climb = ["build", "cascade", "converge", "build"]
             pick = climb if in_build else (busy if dens >= 6 else mid if dens >= 3 else calm)
-            fig = pick[len(cues) % len(pick)]
+            fig = ph["fig"] if ph is not None else pick[len(cues) % len(pick)]
             deep = 0.22 if level < 0.38 else (0.4 if dens >= 6 else 0.5)
             moves = fig in ("sweep", "bounce", "wave", "comet", "handover", "cascade")
             if in_build:
@@ -553,8 +601,9 @@ def author(song, out_path=None):
             fade = 0.35 if not fam_changed else 0.15
             if in_build:
                 fade = 0.6
-            why = "bar %d%s: %s leads, E %.2f, %d hits, mode %s - %s in %s%s" % (
-                bar, " (climbing)" if in_build else "",
+            why = "bars %s, the phrase %s: %s leads, E %.2f, %d hits, mode %s - %s in %s%s" % (
+                ("%d-%d" % (ph["bars"][0], ph["bars"][-1])) if ph else str(bar),
+                ph["word"] if ph else "holds",
                 top_fam, r["E"], dens,
                 ("%+.2f" % mode) if mode is not None else "?", fig, main,
                 (" against %s inside" % counter) if (split_look or len(layers) > 1) else "")
@@ -733,7 +782,7 @@ def author(song, out_path=None):
             continue
         if any(a - 0.1 <= t <= b + 0.1 for a, b in hole_spans):
             continue
-        if t - last_t < 1.7:
+        if t - last_t < 3.6:
             continue
         last_t = t
         climbing = bar in rising
