@@ -1126,6 +1126,9 @@ class Market:
             doc["show"] = {k: show.get(k) for k in keys}
             doc["telemetry"] = ({"measured": False, "example": True}
                                 if doc.get("example") else cls.telemetry(doc["show_id"]))
+            thumb = os.path.join(MARKET, "thumbs", doc["show_id"] + ".jpg")
+            if os.path.isfile(thumb):
+                doc["thumbnail"] = "/market/thumbs/" + doc["show_id"] + ".jpg"
             out.append(doc)
         return out
 
@@ -2643,6 +2646,13 @@ def make_handler(library, baker, rig):
                 return self._json({"listings": Market.list(), "tiers": Market.TIERS,
                                    "transacting": False,
                                    "note": "This is a surface. Nothing here takes money."})
+
+            if path.startswith("/market/thumbs/"):
+                fn = os.path.basename(path)
+                full = os.path.join(MARKET, "thumbs", fn)
+                if not fn.endswith(".jpg") or not os.path.isfile(full):
+                    return self._json({"error": "not found"}, 404)
+                return self._file(full, "image/jpeg")
 
             if path.startswith("/covers/"):
                 # Cache only. Nothing here ever reaches the network at runtime;

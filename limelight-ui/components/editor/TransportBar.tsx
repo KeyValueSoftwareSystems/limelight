@@ -2,10 +2,9 @@
 
 import { familyHue } from "@/lib/tokens";
 import { beatsLabel, mmssms } from "@/lib/grid";
-import type { Clip, Grid } from "@/lib/types";
+import type { Clip } from "@/lib/types";
 import type { SnapStrength } from "@/lib/snap";
 import { Menu } from "@/components/primitives/Menu";
-import { TransportPill } from "./TransportPill";
 import { GUIDES, type GuideKind } from "./Guides";
 
 /* One control system for the whole bar. Before this it carried five text sizes
@@ -66,11 +65,6 @@ function Btn({
 const Rule = () => <span className="w-px h-[16px] bg-[var(--edge)] flex-none mx-[3px]" />;
 
 export function TransportBar({
-  currentTime,
-  duration,
-  grid,
-  playing,
-  onToggle,
   selected,
   removableCount,
   onRemove,
@@ -97,11 +91,6 @@ export function TransportBar({
   onZoomOut,
   onFit,
 }: {
-  currentTime: number;
-  duration: number;
-  grid: Grid;
-  playing: boolean;
-  onToggle: () => void;
   selected: Clip[];
   removableCount: number;
   onRemove: () => void;
@@ -134,17 +123,6 @@ export function TransportBar({
 
   return (
     <div data-transport-bar className="flex-none flex items-center gap-[10px] px-[12px] h-[56px] border-b border-solid border-[var(--edge)] bg-bg">
-      <TransportPill
-        currentTime={currentTime}
-        duration={duration}
-        grid={grid}
-        playing={playing}
-        onToggle={onToggle}
-      />
-
-      <Rule />
-      <Rule />
-
       <span className="flex-1 min-w-0" />
 
       {/* A copy, a cut, a paste and a fine nudge all leave nothing visible on a

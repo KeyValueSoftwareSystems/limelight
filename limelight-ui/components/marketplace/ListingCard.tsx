@@ -3,15 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import { Heart, Tag } from "lucide-react";
 import { MediaCard, CardTag } from "@/components/ui";
-import { CoverCanvas } from "@/components/library/CoverCanvas";
 import { LivePreview } from "./LivePreview";
 import { Stars, Verified } from "./Stars";
 import type { MarketListing, Song } from "@/lib/types";
-
-function sentence(v: string | null | undefined): string | null {
-  const t = (v ?? "").trim();
-  return t ? t.charAt(0).toUpperCase() + t.slice(1) : null;
-}
 
 function money(v: number | null | undefined) {
   if (!v) return "Free";
@@ -32,8 +26,6 @@ export function ListingCard({
   const [visible, setVisible] = useState(false);
   const [hover, setHover] = useState(false);
 
-  /* Same as a show card: the artwork is there at once and the rig fades in over
-     it once its bake lands. Only what you can see asks for one. */
   useEffect(() => {
     const el = boxRef.current;
     if (!el) return;
@@ -49,17 +41,23 @@ export function ListingCard({
       onOpen={() => onOpen(listing)}
       hint={`${show.name} \u00b7 ${money(listing.price_usd)}`}
       media={
-        <>
-          {song ? <CoverCanvas song={song} /> : <div className="absolute inset-0 bg-[#05070C]" />}
-          <div
-            ref={boxRef}
-            className="absolute inset-0"
-            onPointerEnter={() => setHover(true)}
-            onPointerLeave={() => setHover(false)}
-          >
+        <div
+          ref={boxRef}
+          className="absolute inset-0 bg-[#05070C]"
+          onPointerEnter={() => setHover(true)}
+          onPointerLeave={() => setHover(false)}
+        >
+          {listing.thumbnail ? (
+            <img
+              src={listing.thumbnail}
+              alt={show.name}
+              className="w-full h-full object-cover"
+              loading="lazy"
+            />
+          ) : (
             <LivePreview show={show} visible={visible} running={hover} />
-          </div>
-        </>
+          )}
+        </div>
       }
       meta={
         <span className="flex items-center gap-[5px] min-w-0">
@@ -83,16 +81,9 @@ export function ListingCard({
               </span>
             </span>
           )}
-          {/* Only what a buyer weighs at a glance: the rating, and a warning if
-              the rig is a stand-in. Paid/Show/Example were clipping the rating
-              off the end of the row and said nothing the price does not. */}
           {listing.stand_in && <CardTag tone="warn">Stand-in rig</CardTag>}
         </>
       }
-      /* The price is the thing a buyer is looking for, so it gets the footer
-         and the accent. Telemetry sits beside it only when there is some;
-         "No telemetry yet" was taking the most valuable line on the card to
-         say nothing. */
       footer={
         <span className="flex items-baseline gap-[7px] min-w-0">
           <span

@@ -11,14 +11,6 @@ import type { Show } from "@/lib/types";
 
 const MIN_SPAN_S = 1.5;
 
-/**
- * The designer's song map without the lanes.
- *
- * An operator does not place effects, but they still need to see where they are
- * in the track and get somewhere quickly: the bars, the sections the score
- * found, and the moments inside them. Same bands, same position, one third the
- * height.
- */
 export function OperatorTimeline({
   show,
   currentTime,
@@ -34,7 +26,7 @@ export function OperatorTimeline({
   useEffect(() => { setView(fit(show.duration_s ?? 1)); }, [show]);
 
   return (
-    <div className="flex-none border-b border-solid border-[var(--line-strong)]">
+    <div className="flex-none border-b border-solid border-[var(--line-strong)]" style={{ minHeight: 74 }}>
       <Timeline
         view={view}
         duration={duration}

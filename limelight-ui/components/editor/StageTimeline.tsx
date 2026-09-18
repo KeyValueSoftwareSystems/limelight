@@ -1148,11 +1148,6 @@ export function StageTimeline({
   return (
     <div className="h-full flex flex-col min-h-0 bg-bg-sunken">
       <TransportBar
-        currentTime={currentTime}
-        duration={duration}
-        grid={show.grid}
-        playing={playing}
-        onToggle={onToggle}
         selected={selected}
         removableCount={removable.length}
         onRemove={removeSelection}

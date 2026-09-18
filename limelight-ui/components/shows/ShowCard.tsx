@@ -4,7 +4,6 @@ import { AlertTriangle } from "lucide-react";
 import { MediaCard, CardTag } from "@/components/ui";
 import { useEffect, useRef, useState } from "react";
 import { LivePreview } from "@/components/marketplace/LivePreview";
-import { CoverCanvas } from "@/components/library/CoverCanvas";
 import { showColours } from "./showColours";
 import type { ShowFile, Song } from "@/lib/types";
 
@@ -22,7 +21,6 @@ export function ShowCard({
   const [visible, setVisible] = useState(false);
   const [hover, setHover] = useState(false);
 
-  /* Only the cards you can see run their show. */
   useEffect(() => {
     const el = boxRef.current;
     if (!el) return;
@@ -38,12 +36,9 @@ export function ShowCard({
       onOpen={() => onOpen(show)}
       media={
         <>
-          {/* The song's artwork is there at once; the rig fades in over it when
-              its bake lands, so a card is never a black hole while it waits. */}
-          {song ? <CoverCanvas song={song} /> : <div className="absolute inset-0 bg-[#0B0E15]" />}
           <div
             ref={boxRef}
-            className="absolute inset-0"
+            className="absolute inset-0 bg-[#0B0E15]"
             onPointerEnter={() => setHover(true)}
             onPointerLeave={() => setHover(false)}
           >

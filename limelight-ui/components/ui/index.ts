@@ -10,3 +10,4 @@ export { Field } from "./Field";
 export { SegmentedControl } from "./SegmentedControl";
 export { MediaCard, CardTag } from "./MediaCard";
 export { CardSkeleton } from "./CardSkeleton";
+export { VerticalFader, ConsoleKnob, ConsoleButton } from "./VerticalFader";

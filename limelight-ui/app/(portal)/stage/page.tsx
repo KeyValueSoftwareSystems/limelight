@@ -18,6 +18,7 @@ import { OperatorConsole } from "@/components/stage/OperatorConsole";
 import { OperatorStatus } from "@/components/stage/OperatorStatus";
 import { ChatPanel } from "@/components/editor/ChatPanel";
 import { TargetLine } from "@/components/stage/TargetLine";
+import { TransportPill } from "@/components/editor/TransportPill";
 import { VenuePicker } from "@/components/venues/VenuePicker";
 import { StageTimeline } from "@/components/editor/StageTimeline";
 import { SaveShowDialog } from "@/components/editor/SaveShowDialog";
@@ -66,6 +67,12 @@ export default function StagePage() {
   const [stageMsg, setStageMsg] = useState<string | null>(null);
   const rebuildTokenRef = useRef(0);
   const [venuePickerOpen, setVenuePickerOpen] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  useEffect(() => {
+    const handler = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange", handler);
+    return () => document.removeEventListener("fullscreenchange", handler);
+  }, []);
 
   /* Saving asks for the name in a dialog rather than reading it off a box in
      the header — see SaveShowDialog. `savedName` is what the last save called
@@ -109,6 +116,7 @@ export default function StagePage() {
     const cap = box ? box.height - 220 : 520;
     setEditorH(Math.round(Math.min(Math.max(natural, 220), Math.max(220, cap))));
   }, []);
+  const previewRef = useRef<HTMLDivElement>(null);
   const columnRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<HTMLElement>(null);
 
@@ -1167,7 +1175,7 @@ export default function StagePage() {
             <TargetLine onOpenVenuePicker={() => setVenuePickerOpen(true)} />
           </div>
 
-          <div className="flex-1 min-h-0 flex flex-col">
+          <div ref={previewRef} className="flex-1 min-h-0 flex flex-col">
             <StagePreview
               clockRef={clockRef}
               playing={isPlaying}
@@ -1190,6 +1198,40 @@ export default function StagePage() {
             </div>
           ) : null}
 
+          <div className="flex-none flex items-center gap-[10px] px-[16px] py-[6px] border-t border-solid border-white/[0.04]">
+            <TransportPill
+              currentTime={currentTime}
+              duration={show?.duration_s ?? song?.duration_s ?? 0}
+              grid={show?.grid ?? null}
+              playing={isPlaying}
+              onToggle={handleToggle}
+            />
+            <span className="flex-1" />
+            <button
+              type="button"
+              onClick={() => {
+                if (document.fullscreenElement) document.exitFullscreen();
+                else previewRef.current?.requestFullscreen?.();
+              }}
+              title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
+              className="liquid liquid-key flex items-center justify-center w-[30px] h-[30px] rounded-[var(--radius-sm)] text-ink-dim cursor-pointer hover:text-ink"
+            >
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                {isFullscreen ? (
+                  <>
+                    <polyline points="4 14 4 10 0 10" /><polyline points="12 2 12 6 16 6" />
+                    <polyline points="14 10 10 10 10 14" /><polyline points="2 6 6 6 6 2" />
+                  </>
+                ) : (
+                  <>
+                    <polyline points="0 6 0 0 6 0" /><polyline points="10 0 16 0 16 6" />
+                    <polyline points="16 10 16 16 10 16" /><polyline points="6 16 0 16 0 10" />
+                  </>
+                )}
+              </svg>
+            </button>
+          </div>
+
           <div
             onPointerDown={startResize}
             role="separator"
@@ -1200,7 +1242,7 @@ export default function StagePage() {
 
           <section
             ref={editorRef}
-            style={{ height: isOperator ? 300 : editorH, minHeight: MIN_EDITOR }}
+            style={{ height: editorH, minHeight: MIN_EDITOR }}
             className="flex-initial overflow-hidden"
           >
             {isOperator ? (

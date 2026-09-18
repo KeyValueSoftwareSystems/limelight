@@ -33,6 +33,7 @@ const nextConfig: NextConfig = {
       { source: "/api/:path*", destination: `${PORTAL}/api/:path*` },
       { source: "/audio/:path*", destination: `${PORTAL}/audio/:path*` },
       { source: "/covers/:path*", destination: `${PORTAL}/covers/:path*` },
+      { source: "/market/thumbs/:path*", destination: `${PORTAL}/market/thumbs/:path*` },
       { source: "/hub/:path*", destination: `${PORTAL}/hub/:path*` },
     ];
   },

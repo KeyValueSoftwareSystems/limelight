@@ -523,6 +523,7 @@ export interface MarketListing {
   cuts_source?: string;
   stand_in?: boolean;
   telemetry: Telemetry;
+  thumbnail?: string;
   example?: boolean;
   example_note?: string;
   listed?: string;

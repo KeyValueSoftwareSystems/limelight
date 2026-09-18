@@ -29,7 +29,6 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-/** What the rig is doing right now, which is the one thing a desk must show. */
 export function OperatorStatus({
   clockRef,
   playing,
@@ -46,9 +45,6 @@ export function OperatorStatus({
   const syncLatency = usePortalStore((s) => s.syncLatency);
   const syncNudge = usePortalStore((s) => s.syncNudge);
 
-  /* A meter that only moves when React happens to render is not a meter, so the
-     live position is pulled on an animation frame into state. The clock is read
-     inside the effect, never during render. */
   const [liveT, setLiveT] = useState(currentTime);
   const clock = useRef(clockRef);
   clock.current = clockRef;
@@ -137,7 +133,7 @@ export function OperatorStatus({
             tone={limits.strobe.allowed ? undefined : "warn"}
           />
           {limits.keep_out.map((k) => (
-            <Row key={k.name} label={`Keep out · ${k.name}`} value={`${k.from}\u00b0 to ${k.to}\u00b0`} />
+            <Row key={k.name} label={`Keep out · ${k.name}`} value={`${k.from}° to ${k.to}°`} />
           ))}
           {!!limits.frames_clamped && (
             <Row
