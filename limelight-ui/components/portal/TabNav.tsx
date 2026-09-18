@@ -13,7 +13,7 @@ const TABS: Record<Role, { id: string; label: string; href: string }[]> = {
   ],
   venue: [
     { id: "shows", label: "Shows", href: "/shows" },
-    { id: "venues", label: "Rooms", href: "/venues" },
+    { id: "venues", label: "Venues", href: "/venues" },
     { id: "marketplace", label: "Marketplace", href: "/marketplace" },
   ],
 };
