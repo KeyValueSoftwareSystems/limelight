@@ -123,6 +123,20 @@
         }
       ],
       "default": "ultra-sunburn.layout.json"
+    },
+    {
+      "id": "ven_test",
+      "name": "Test",
+      "example": false,
+      "access": "public",
+      "note": null,
+      "layouts": [
+        {
+          "name": "House rig",
+          "file": "test.layout.json"
+        }
+      ],
+      "default": "test.layout.json"
     }
   ]
 }

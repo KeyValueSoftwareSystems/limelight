@@ -1,0 +1,95 @@
+{
+ "layout": "0.5",
+ "rig": "test",
+ "geometry": "line",
+ "frame": "audience",
+ "note": "Built in the venue builder: 1 x par5, 1 x wash12, 1 x spot29, 1 x blinder1, 1 x strobe3, 1 x laser8, 1 x pixelbar24, 82 DMX channels in universe 0. Positions in metres in the AUDIENCE frame (+x = audience's right, +y = toward audience, +z = height above deck).",
+ "fixtures": [
+  {
+   "id": "par_01",
+   "type": "par5",
+   "at": [
+    0.0,
+    0.0,
+    2.4
+   ],
+   "universe": 0,
+   "address": 1
+  },
+  {
+   "id": "wash_01",
+   "type": "wash12",
+   "at": [
+    0.0,
+    0.4,
+    3.0
+   ],
+   "universe": 0,
+   "address": 6
+  },
+  {
+   "id": "spot_01",
+   "type": "spot29",
+   "at": [
+    0.0,
+    0.2,
+    3.6
+   ],
+   "universe": 0,
+   "address": 18
+  },
+  {
+   "id": "blinder_01",
+   "type": "blinder1",
+   "at": [
+    0.0,
+    0.6,
+    2.0
+   ],
+   "universe": 0,
+   "address": 47
+  },
+  {
+   "id": "strobe_01",
+   "type": "strobe3",
+   "at": [
+    0.0,
+    0.6,
+    2.8
+   ],
+   "universe": 0,
+   "address": 48
+  },
+  {
+   "id": "laser_01",
+   "type": "laser8",
+   "at": [
+    0.0,
+    0.8,
+    1.2
+   ],
+   "universe": 0,
+   "address": 51
+  },
+  {
+   "id": "strip_01",
+   "type": "pixelbar24",
+   "at": [
+    0.0,
+    0.2,
+    1.0
+   ],
+   "universe": 0,
+   "address": 59
+  }
+ ],
+ "limits": {
+  "max_pan_per_frame": 7,
+  "max_tilt_per_frame": 7
+ },
+ "room": {
+  "width": 14.0,
+  "depth": 6.0,
+  "height": 7.0
+ }
+}
