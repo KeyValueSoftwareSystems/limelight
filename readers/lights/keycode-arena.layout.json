@@ -1,12 +1,12 @@
 {
  "layout": "0.5",
  "rig": "keycode-arena",
- "geometry": "trussed",
+ "geometry": "line",
  "frame": "audience",
- "note": "KeyCode Arena: the full house rig. Eight trusses' worth of kit on one universe -- a 16-lamp wash bar upstage, six uplight pods on the deck, eight beam spots on the mid truss, six zooming washes out front, four audience blinders with a strobe outboard of each end, two lasers, and a vertical pixel strip framing each side. Positions in metres in the AUDIENCE frame: at = [x, depth, height], +x = the audience's right, depth grows toward the audience, height from the floor.\n\nTHREE THINGS ARE DELIBERATE. Every device type here except the laser was read out of a real GDTF file under mvr/gdtf/ -- channel orders, beam angles and zoom ranges are the manufacturers' own, not invented. The lamps that mix colour and stay put number 24, a multiple of four, because groupsOf() splits inner/outer at floor(n/2) and an odd split makes every mirrored look lopsided. And unlike club16 this rig genuinely has DEPTH: the back truss sits at 0.0 and the front truss at 4.4, so a travelling effect crosses the room rather than running along a single bar.",
+ "note": "Built in the venue builder: 22 x par5, 6 x wash12, 8 x spot29, 4 x blinder1, 2 x strobe3, 2 x laser8, 2 x pixelbar24, 488 DMX channels in universe 0. Positions in metres in the AUDIENCE frame (+x = audience's right, +y = toward audience, +z = height above deck).",
  "fixtures": [
   {
-   "id": "par_back_01",
+   "id": "par_01",
    "type": "par5",
    "at": [
     -5.625,
@@ -17,172 +17,7 @@
    "address": 1
   },
   {
-   "id": "par_back_02",
-   "type": "par5",
-   "at": [
-    -4.875,
-    0.0,
-    5.2
-   ],
-   "universe": 0,
-   "address": 6
-  },
-  {
-   "id": "par_back_03",
-   "type": "par5",
-   "at": [
-    -4.125,
-    0.0,
-    5.2
-   ],
-   "universe": 0,
-   "address": 11
-  },
-  {
-   "id": "par_back_04",
-   "type": "par5",
-   "at": [
-    -3.375,
-    0.0,
-    5.2
-   ],
-   "universe": 0,
-   "address": 16
-  },
-  {
-   "id": "par_back_05",
-   "type": "par5",
-   "at": [
-    -2.625,
-    0.0,
-    5.2
-   ],
-   "universe": 0,
-   "address": 21
-  },
-  {
-   "id": "par_back_06",
-   "type": "par5",
-   "at": [
-    -1.875,
-    0.0,
-    5.2
-   ],
-   "universe": 0,
-   "address": 26
-  },
-  {
-   "id": "par_back_07",
-   "type": "par5",
-   "at": [
-    -1.125,
-    0.0,
-    5.2
-   ],
-   "universe": 0,
-   "address": 31
-  },
-  {
-   "id": "par_back_08",
-   "type": "par5",
-   "at": [
-    -0.375,
-    0.0,
-    5.2
-   ],
-   "universe": 0,
-   "address": 36
-  },
-  {
-   "id": "par_back_09",
-   "type": "par5",
-   "at": [
-    0.375,
-    0.0,
-    5.2
-   ],
-   "universe": 0,
-   "address": 41
-  },
-  {
-   "id": "par_back_10",
-   "type": "par5",
-   "at": [
-    1.125,
-    0.0,
-    5.2
-   ],
-   "universe": 0,
-   "address": 46
-  },
-  {
-   "id": "par_back_11",
-   "type": "par5",
-   "at": [
-    1.875,
-    0.0,
-    5.2
-   ],
-   "universe": 0,
-   "address": 51
-  },
-  {
-   "id": "par_back_12",
-   "type": "par5",
-   "at": [
-    2.625,
-    0.0,
-    5.2
-   ],
-   "universe": 0,
-   "address": 56
-  },
-  {
-   "id": "par_back_13",
-   "type": "par5",
-   "at": [
-    3.375,
-    0.0,
-    5.2
-   ],
-   "universe": 0,
-   "address": 61
-  },
-  {
-   "id": "par_back_14",
-   "type": "par5",
-   "at": [
-    4.125,
-    0.0,
-    5.2
-   ],
-   "universe": 0,
-   "address": 66
-  },
-  {
-   "id": "par_back_15",
-   "type": "par5",
-   "at": [
-    4.875,
-    0.0,
-    5.2
-   ],
-   "universe": 0,
-   "address": 71
-  },
-  {
-   "id": "par_back_16",
-   "type": "par5",
-   "at": [
-    5.625,
-    0.0,
-    5.2
-   ],
-   "universe": 0,
-   "address": 76
-  },
-  {
-   "id": "par_floor_01",
+   "id": "par_02",
    "type": "par5",
    "at": [
     -5.0,
@@ -190,10 +25,43 @@
     0.3
    ],
    "universe": 0,
-   "address": 81
+   "address": 6
   },
   {
-   "id": "par_floor_02",
+   "id": "par_03",
+   "type": "par5",
+   "at": [
+    -4.875,
+    0.0,
+    5.2
+   ],
+   "universe": 0,
+   "address": 11
+  },
+  {
+   "id": "par_04",
+   "type": "par5",
+   "at": [
+    -4.125,
+    0.0,
+    5.2
+   ],
+   "universe": 0,
+   "address": 16
+  },
+  {
+   "id": "par_05",
+   "type": "par5",
+   "at": [
+    -3.375,
+    0.0,
+    5.2
+   ],
+   "universe": 0,
+   "address": 21
+  },
+  {
+   "id": "par_06",
    "type": "par5",
    "at": [
     -3.0,
@@ -201,10 +69,43 @@
     0.3
    ],
    "universe": 0,
-   "address": 86
+   "address": 26
   },
   {
-   "id": "par_floor_03",
+   "id": "par_07",
+   "type": "par5",
+   "at": [
+    -2.625,
+    0.0,
+    5.2
+   ],
+   "universe": 0,
+   "address": 31
+  },
+  {
+   "id": "par_08",
+   "type": "par5",
+   "at": [
+    -1.875,
+    0.0,
+    5.2
+   ],
+   "universe": 0,
+   "address": 36
+  },
+  {
+   "id": "par_09",
+   "type": "par5",
+   "at": [
+    -1.125,
+    0.0,
+    5.2
+   ],
+   "universe": 0,
+   "address": 41
+  },
+  {
+   "id": "par_10",
    "type": "par5",
    "at": [
     -1.0,
@@ -212,10 +113,32 @@
     0.3
    ],
    "universe": 0,
-   "address": 91
+   "address": 46
   },
   {
-   "id": "par_floor_04",
+   "id": "par_11",
+   "type": "par5",
+   "at": [
+    -0.375,
+    0.0,
+    5.2
+   ],
+   "universe": 0,
+   "address": 51
+  },
+  {
+   "id": "par_12",
+   "type": "par5",
+   "at": [
+    0.375,
+    0.0,
+    5.2
+   ],
+   "universe": 0,
+   "address": 56
+  },
+  {
+   "id": "par_13",
    "type": "par5",
    "at": [
     1.0,
@@ -223,10 +146,43 @@
     0.3
    ],
    "universe": 0,
-   "address": 96
+   "address": 61
   },
   {
-   "id": "par_floor_05",
+   "id": "par_14",
+   "type": "par5",
+   "at": [
+    1.125,
+    0.0,
+    5.2
+   ],
+   "universe": 0,
+   "address": 66
+  },
+  {
+   "id": "par_15",
+   "type": "par5",
+   "at": [
+    1.875,
+    0.0,
+    5.2
+   ],
+   "universe": 0,
+   "address": 71
+  },
+  {
+   "id": "par_16",
+   "type": "par5",
+   "at": [
+    2.625,
+    0.0,
+    5.2
+   ],
+   "universe": 0,
+   "address": 76
+  },
+  {
+   "id": "par_17",
    "type": "par5",
    "at": [
     3.0,
@@ -234,15 +190,59 @@
     0.3
    ],
    "universe": 0,
-   "address": 101
+   "address": 81
   },
   {
-   "id": "par_floor_06",
+   "id": "par_18",
+   "type": "par5",
+   "at": [
+    3.375,
+    0.0,
+    5.2
+   ],
+   "universe": 0,
+   "address": 86
+  },
+  {
+   "id": "par_19",
+   "type": "par5",
+   "at": [
+    4.125,
+    0.0,
+    5.2
+   ],
+   "universe": 0,
+   "address": 91
+  },
+  {
+   "id": "par_20",
+   "type": "par5",
+   "at": [
+    4.875,
+    0.0,
+    5.2
+   ],
+   "universe": 0,
+   "address": 96
+  },
+  {
+   "id": "par_21",
    "type": "par5",
    "at": [
     5.0,
     0.6,
     0.3
+   ],
+   "universe": 0,
+   "address": 101
+  },
+  {
+   "id": "par_22",
+   "type": "par5",
+   "at": [
+    5.625,
+    0.0,
+    5.2
    ],
    "universe": 0,
    "address": 106
@@ -314,7 +314,7 @@
    "address": 171
   },
   {
-   "id": "spot_1",
+   "id": "spot_01",
    "type": "spot29",
    "at": [
     -5.25,
@@ -325,7 +325,7 @@
    "address": 183
   },
   {
-   "id": "spot_2",
+   "id": "spot_02",
    "type": "spot29",
    "at": [
     -3.75,
@@ -336,7 +336,7 @@
    "address": 212
   },
   {
-   "id": "spot_3",
+   "id": "spot_03",
    "type": "spot29",
    "at": [
     -2.25,
@@ -347,7 +347,7 @@
    "address": 241
   },
   {
-   "id": "spot_4",
+   "id": "spot_04",
    "type": "spot29",
    "at": [
     -0.75,
@@ -358,7 +358,7 @@
    "address": 270
   },
   {
-   "id": "spot_5",
+   "id": "spot_05",
    "type": "spot29",
    "at": [
     0.75,
@@ -369,7 +369,7 @@
    "address": 299
   },
   {
-   "id": "spot_6",
+   "id": "spot_06",
    "type": "spot29",
    "at": [
     2.25,
@@ -380,7 +380,7 @@
    "address": 328
   },
   {
-   "id": "spot_7",
+   "id": "spot_07",
    "type": "spot29",
    "at": [
     3.75,
@@ -391,7 +391,7 @@
    "address": 357
   },
   {
-   "id": "spot_8",
+   "id": "spot_08",
    "type": "spot29",
    "at": [
     5.25,
@@ -402,7 +402,7 @@
    "address": 386
   },
   {
-   "id": "blinder_1",
+   "id": "blinder_01",
    "type": "blinder1",
    "at": [
     -3.6,
@@ -413,7 +413,7 @@
    "address": 415
   },
   {
-   "id": "blinder_2",
+   "id": "blinder_02",
    "type": "blinder1",
    "at": [
     -1.2,
@@ -424,7 +424,7 @@
    "address": 416
   },
   {
-   "id": "blinder_3",
+   "id": "blinder_03",
    "type": "blinder1",
    "at": [
     1.2,
@@ -435,7 +435,7 @@
    "address": 417
   },
   {
-   "id": "blinder_4",
+   "id": "blinder_04",
    "type": "blinder1",
    "at": [
     3.6,
@@ -446,7 +446,7 @@
    "address": 418
   },
   {
-   "id": "strobe_1",
+   "id": "strobe_01",
    "type": "strobe3",
    "at": [
     -5.4,
@@ -457,7 +457,7 @@
    "address": 419
   },
   {
-   "id": "strobe_2",
+   "id": "strobe_02",
    "type": "strobe3",
    "at": [
     5.4,
@@ -468,7 +468,7 @@
    "address": 422
   },
   {
-   "id": "laser_1",
+   "id": "laser_01",
    "type": "laser8",
    "at": [
     -2.4,
@@ -479,7 +479,7 @@
    "address": 425
   },
   {
-   "id": "laser_2",
+   "id": "laser_02",
    "type": "laser8",
    "at": [
     2.4,
@@ -490,7 +490,7 @@
    "address": 433
   },
   {
-   "id": "strip_1",
+   "id": "strip_01",
    "type": "pixelbar24",
    "at": [
     -6.4,
@@ -501,7 +501,7 @@
    "address": 441
   },
   {
-   "id": "strip_2",
+   "id": "strip_02",
    "type": "pixelbar24",
    "at": [
     6.4,
@@ -514,38 +514,11 @@
  ],
  "limits": {
   "max_pan_per_frame": 7,
-  "max_tilt_per_frame": 7,
-  "laser_zones": {
-   "note": "The only zones the lasers may scan. preflight.js will not enumerate laser_sweep for a layout that has not stated these, which is why they are here rather than in a comment. Audience-scanning is not among them and must not be added without someone qualified signing it off.",
-   "allowed": [
-    {
-     "name": "above_heads",
-     "tilt_deg": [
-      22,
-      90
-     ],
-     "why": "everything from 22 degrees up clears a standing crowd at this trim height"
-    },
-    {
-     "name": "stage_floor",
-     "tilt_deg": [
-      -90,
-      -12
-     ],
-     "why": "pointed down at the deck, behind the barrier"
-    }
-   ],
-   "forbidden": [
-    {
-     "name": "audience_plane",
-     "tilt_deg": [
-      -12,
-      22
-     ],
-     "why": "eye height for a standing crowd"
-    }
-   ],
-   "max_hold_ms": 120
-  }
+  "max_tilt_per_frame": 7
+ },
+ "room": {
+  "width": 14.0,
+  "depth": 7.0,
+  "height": 8.0
  }
 }
