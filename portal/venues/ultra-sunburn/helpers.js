@@ -174,6 +174,7 @@ function nearestWheelColour(rgb) {
    whose colour sits further into its block, so the roles come from the profile
    rather than from one hardcoded offset table. */
 function setPar(frame, par, colour, level) {
+  if (!par) return;
   const r = ROLES[par.type] || ROLES.par5;
   const o = par.offset;
   const l = clamp(level, 0, 1);
@@ -187,6 +188,7 @@ function setPar(frame, par, colour, level) {
 }
 
 function setParStrobe(frame, par, hz) {
+  if (!par) return;
   const r = ROLES[par.type] || ROLES.par5;
   if (r.strobe === undefined) return;
   frame[par.offset + r.strobe] = hz > 0 ? clamp(Math.round((hz / 25) * 255), 1, 255) : 0;
@@ -195,6 +197,7 @@ function setParStrobe(frame, par, hz) {
 /* Set a head's state. The arena's heads are spot29: subtractive CMY rather than
    a colour wheel, master at the far end of the block, and no fine channels. */
 function setHead(frame, head, opts) {
+  if (!head) return;
   const r = ROLES[head.type] || ROLES.spot29;
   const o = head.offset;
   const level = clamp(opts.level != null ? opts.level : 0, 0, 1);

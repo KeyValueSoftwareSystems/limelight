@@ -1379,3 +1379,40 @@ The script could not load a single `.ts` file without
   pattern appears in it. Kill by PID.
 - **Zero comments in code is hook-enforced.** A `PreToolUse` hook rejects
   docstrings and banner comments outright. Reasoning goes in the commit message.
+
+### "baker.js failed: ous)"
+
+Two bugs, one hiding the other.
+
+**The message.** `Baker._run` reported `(r.stderr or r.stdout).strip()[-400:]` —
+the *last* 400 characters of a node stack trace. That is the module-loader
+frames, identical for every failure, and it throws away the one line that says
+what went wrong. It began mid-word, hence "ous)". `node_error()` now takes the
+first `*Error:` line plus the first frame that is not `node:internal`.
+
+**The bug it was hiding.** A venue built with fewer than two spot29s crashed
+every effect that reaches for a second head:
+
+```
+TypeError: Cannot read properties of undefined (reading 'type')
+  at setHead (portal/venues/<slug>/helpers.js:198:24)
+```
+
+`write_venue_modules` copies the stock modules from keycode-arena, and three of
+them index `H.HEADS[1]` (twenty more index `H.HEADS[0]`). Arena has enough
+heads; a rig built in the builder may have one, or none. `halo-portal/helpers.js`
+already carried `if (!head) return;` — nobody had propagated it.
+
+`setPar`, `setParStrobe` and `setHead` now guard in every venue's helpers and in
+the arena source new venues are copied from. The guard only fires where the
+fixture was `undefined`, which previously threw, so it cannot change a bake that
+already worked. An effect on a one-head rig now lights the head it has and skips
+the one it does not.
+
+Measured on a builder rig with 1 spot29: **1 of 35 songs failed before, 0 of 35
+after**, and the song that failed (makeba) now bakes 5014 frames, 100% of
+sampled frames lit, peak 255.
+
+Near misses checked while in there: `ENDS` already filters, `CENTRE` branches on
+parity so an even par count does not produce a fractional index, and `lampN`
+guards. `setHead`/`setPar` were the only gap.

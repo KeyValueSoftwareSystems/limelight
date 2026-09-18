@@ -131,6 +131,7 @@ function nearestWheelColour(rgb) {
 
 /* Set a par's colour and level in a frame. Level is 0..1, colour is [r,g,b] 0..1. */
 function setPar(frame, par, colour, level) {
+  if (!par) return;
   const o = par.offset;
   const l = clamp(level, 0, 1);
   const c = rgb255(colour);
@@ -141,12 +142,14 @@ function setPar(frame, par, colour, level) {
 }
 
 function setParStrobe(frame, par, hz) {
+  if (!par) return;
   const o = par.offset;
   frame[o + PAR.strobe] = hz > 0 ? clamp(Math.round((hz / 25) * 255), 1, 255) : 0;
 }
 
 /* Set a head's state in a frame. Level 0..1, colour as [r,g,b], pan/tilt 0..1. */
 function setHead(frame, head, opts) {
+  if (!head) return;
   const o = head.offset;
   const level = clamp(opts.level != null ? opts.level : 0, 0, 1);
   frame[o + HEAD.master] = clamp(Math.round(level * 255), 0, 255);

@@ -564,6 +564,29 @@ def patch(fixtures):
     return out, addr - 1
 
 
+def node_error(text):
+    """The first line of a node failure, plus where it happened.
+
+    This used to be text[-400:], which keeps the BOTTOM of a stack trace - the
+    module loader frames, identical for every failure - and throws away the one
+    line that says what went wrong. It reported "ous) at Object.<anonymous>".
+    """
+    lines = [ln.rstrip() for ln in (text or "").splitlines() if ln.strip()]
+    if not lines:
+        return "no output"
+    msg = next((ln.strip() for ln in lines
+                if re.match(r"^[\w$]*(Error|Exception):", ln.strip())), None)
+    if msg is None:
+        msg = next((ln.strip() for ln in lines
+                    if not ln.strip().startswith("at ")
+                    and not re.match(r"^\s*\^+\s*$", ln)
+                    and not re.match(r"^\S+:\d+$", ln.strip())), lines[0].strip())
+    where = next((ln.strip() for ln in lines if ln.strip().startswith("at ")
+                  and "node:internal" not in ln), "")
+    out = msg if not where else "%s (%s)" % (msg, where[3:])
+    return out[:400]
+
+
 def clean_room(room):
     if not isinstance(room, dict):
         return None
@@ -1264,7 +1287,7 @@ class Baker:
         r = subprocess.run(cmd, cwd=REPO, capture_output=True, text=True)
         os.unlink(plan_file)
         if r.returncode != 0:
-            raise RuntimeError("baker.js failed: " + (r.stderr or r.stdout).strip()[-400:])
+            raise RuntimeError("baker.js failed: " + node_error(r.stderr or r.stdout))
 
         with open(cache) as fh:
             show = json.load(fh)
