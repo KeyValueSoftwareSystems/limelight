@@ -3,13 +3,13 @@
  "rig": "test",
  "geometry": "line",
  "frame": "audience",
- "note": "Built in the venue builder: 1 x par5, 1 x wash12, 1 x spot29, 1 x blinder1, 1 x strobe3, 1 x laser8, 1 x pixelbar24, 82 DMX channels in universe 0. Positions in metres in the AUDIENCE frame (+x = audience's right, +y = toward audience, +z = height above deck).",
+ "note": "Built in the venue builder: 3 x par5, 1 x wash12, 1 x spot29, 1 x blinder1, 1 x strobe3, 1 x laser8, 1 x pixelbar24, 92 DMX channels in universe 0. Positions in metres in the AUDIENCE frame (+x = audience's right, +y = toward audience, +z = height above deck).",
  "fixtures": [
   {
    "id": "par_01",
    "type": "par5",
    "at": [
-    0.0,
+    0.4,
     0.0,
     2.4
    ],
@@ -17,70 +17,92 @@
    "address": 1
   },
   {
-   "id": "wash_01",
-   "type": "wash12",
+   "id": "par_02",
+   "type": "par5",
    "at": [
+    0.75,
     0.0,
-    0.4,
-    3.0
+    2.4
    ],
    "universe": 0,
    "address": 6
   },
   {
+   "id": "par_03",
+   "type": "par5",
+   "at": [
+    3.3,
+    0.0,
+    5.05
+   ],
+   "universe": 0,
+   "address": 11
+  },
+  {
+   "id": "wash_01",
+   "type": "wash12",
+   "at": [
+    1.2,
+    0.4,
+    6.35
+   ],
+   "universe": 0,
+   "address": 16
+  },
+  {
    "id": "spot_01",
    "type": "spot29",
    "at": [
-    0.0,
+    -2.9,
     0.2,
-    3.6
+    5.65
    ],
    "universe": 0,
-   "address": 18
+   "address": 28
   },
   {
    "id": "blinder_01",
    "type": "blinder1",
    "at": [
-    0.0,
+    -2.85,
     0.6,
-    2.0
+    7.0
    ],
    "universe": 0,
-   "address": 47
+   "address": 57
   },
   {
    "id": "strobe_01",
    "type": "strobe3",
    "at": [
-    0.0,
+    -4.6,
     0.6,
-    2.8
+    7.0
    ],
    "universe": 0,
-   "address": 48
+   "address": 58
   },
   {
    "id": "laser_01",
    "type": "laser8",
    "at": [
-    0.0,
+    3.85,
     0.8,
-    1.2
+    2.4
    ],
    "universe": 0,
-   "address": 51
+   "address": 61
   },
   {
    "id": "strip_01",
    "type": "pixelbar24",
    "at": [
-    0.0,
+    1.3,
     0.2,
-    1.0
+    7.0
    ],
    "universe": 0,
-   "address": 59
+   "address": 69
   }
  ],
  "limits": {

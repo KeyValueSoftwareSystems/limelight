@@ -160,6 +160,12 @@
   ],
   "note": "anchors [lo, centre, hi]: 0.5 is the wall spot, 0/1 the ends of travel. Park bypasses this."
  },
+ "pan": {
+  "centre_dmx": 169.0,
+  "travel_deg": 540.0,
+  "measured": true,
+  "note": "Measured on the real head by rig.py: PAN_WALL_CENTRE=169 and PAN_DEG_PER_DMX=540/255. A venue keep_out zone is in degrees, so it can only be enforced on a mover that declares this. A mover without it is reported as unchecked rather than assumed safe."
+ },
  "park": {
   "pan": 0.6627450980392157,
   "tilt": 0.4980392156862745,

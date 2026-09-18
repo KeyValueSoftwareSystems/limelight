@@ -132,9 +132,16 @@ class Rigmap:
             by_master = p.get("brightness") == "master"
             level = idx.get("master", []) if by_master else [
                 i for r in self.ADDITIVE for i in idx.get(r, [])]
+            sr = p.get("strobe_range") or {}
             out.append({"type": f.get("type"), "base": base, "idx": idx,
                         "level": level, "strobe": idx.get("strobe", []),
                         "moves": "move" in (p.get("can") or []),
+                        "pan": idx.get("pan", []), "pan_fine": idx.get("pan_fine", []),
+                        "tilt": idx.get("tilt", []),
+                        "strobe_off": int(sr.get("open", 0)),
+                        "strobe_lo": int(sr.get("lo", 0)),
+                        "strobe_hi": int(sr.get("hi", 255)),
+                        "pan_cal": p.get("pan"),
                         "white": self._white(p, idx, by_master)})
         return out
 
@@ -1669,6 +1676,7 @@ class Limits:
         self.rate_pan = mr.get("pan_per_frame")
         self.rate_tilt = mr.get("tilt_per_frame")
         self.blocked = 0                  # frames in which something was pulled down
+        self.unchecked = {}               # movers a keep_out zone could not be checked against
 
     @classmethod
     def load(cls, path):
@@ -1693,6 +1701,105 @@ class Limits:
         return None
 
     def apply(self, frame, rigmap, prev=None):
+        """frame: one DMX frame. rigmap: which channels are what, for the layout
+        this show was baked against. prev: what actually went out last, for the
+        rate cap."""
+        if not rigmap.roles:
+            return self._apply_legacy(frame, rigmap, prev)
+        f = list(frame)
+        hit = False
+
+        for fx in rigmap.roles:
+            k = self.head_max if fx["moves"] else self.par_max
+            if k < 1.0:
+                for i in fx["level"]:
+                    v = int(f[i] * k)
+                    if v != f[i]:
+                        hit = True
+                    f[i] = v
+            for i in fx["strobe"]:
+                v = self._strobe_clamp(f[i], fx)
+                if v != f[i]:
+                    hit = True
+                f[i] = v
+            if self.keep_out and fx["moves"] and any(f[i] for i in fx["level"]):
+                deg = self._pan_deg_of(f, fx)
+                if deg is None:
+                    self.unchecked[fx["type"]] = self.unchecked.get(fx["type"], 0) + 1
+                elif self.in_keep_out(deg) is not None:
+                    for i in fx["level"]:
+                        if f[i]:
+                            hit = True
+                        f[i] = 0
+
+        if prev is not None and len(prev) == len(f):
+            if self.rate_up is not None:
+                cap = int(self.rate_up)
+                for i in rigmap.par_level_idx() + rigmap.head_dim_idx():
+                    ceiling = prev[i] + cap
+                    if f[i] > ceiling:
+                        f[i] = ceiling
+                        hit = True
+            for fx in rigmap.roles:
+                if not fx["moves"]:
+                    continue
+                for idxs, cap in ((fx["pan"], self.rate_pan), (fx["tilt"], self.rate_tilt)):
+                    if cap is None:
+                        continue
+                    for i in idxs:
+                        d = f[i] - prev[i]
+                        if abs(d) > cap:
+                            f[i] = prev[i] + (cap if d > 0 else -cap)
+                            hit = True
+
+        if hit:
+            self.blocked += 1
+        return bytes(max(0, min(255, int(x))) for x in f)
+
+    def _strobe_clamp(self, value, fx):
+        """A strobe channel does not mean the same thing on every fixture.
+
+        On a par7 it is a rate: 0 is off, 255 is fastest. On a wash12 or spot29
+        it is a SHUTTER, and the profile's strobe_range says which value holds
+        it open and which band strobes. Clamping the second kind as if it were
+        the first can close a shutter that was only open -- the rig going dark
+        rather than the rig being made safer.
+        """
+        off, lo, hi = fx["strobe_off"], fx["strobe_lo"], fx["strobe_hi"]
+        if self.strobe_max <= 0:
+            return off
+        if hi <= lo:
+            return value
+        ceiling = lo + (self.strobe_max / 255.0) * (hi - lo)
+        if lo <= value <= hi and value > ceiling:
+            return int(round(ceiling))
+        return value
+
+    def _pan_deg_of(self, f, fx):
+        """Where this mover points, or None if that cannot be known.
+
+        A keep_out zone is written in degrees, so enforcing it needs the
+        fixture's own centre and travel. head13 declares them because they were
+        measured on the real head. Nothing else declares them, and guessing 540
+        because it is a common figure would be inventing the one number the zone
+        turns on. None means unchecked, and unchecked is counted and reported.
+        """
+        cal = fx.get("pan_cal")
+        if not cal or not fx["pan"]:
+            return None
+        coarse = f[fx["pan"][0]]
+        fine = f[fx["pan_fine"][0]] if fx["pan_fine"] else 0
+        centre = float(cal.get("centre_dmx", self.PAN_CENTRE))
+        per_dmx = float(cal.get("travel_deg", 540.0)) / 255.0
+        return ((coarse * 256 + fine) / 256.0 - centre) * per_dmx
+
+    def report(self):
+        """What the ceiling did, and what it could not check."""
+        return {"blocked_frames": self.blocked,
+                "keep_out_zones": [z[2] for z in self.keep_out],
+                "keep_out_unchecked": dict(self.unchecked)}
+
+    def _apply_legacy(self, frame, rigmap, prev=None):
         """frame: one DMX frame. rigmap: which channels are what, for the layout
         this show was baked against. prev: what actually went out last, for the
         rate cap."""
@@ -1767,6 +1874,7 @@ class Limits:
             "max_rate": {"intensity_up_per_frame": self.rate_up,
                          "pan_per_frame": self.rate_pan, "tilt_per_frame": self.rate_tilt},
             "frames_clamped": self.blocked,
+            "keep_out_unchecked": dict(self.unchecked),
         }
 
 

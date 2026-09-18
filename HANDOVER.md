@@ -1445,3 +1445,63 @@ unrelated to this bug. In the browser, the reported song now runs 0:00.000 →
 **Trap for next time:** a headless Chrome driven over CDP really does play audio
 out of the speakers, and exiting the script does not stop it. Pause, or kill the
 browser, before leaving.
+
+## 2026-09-18 (later) — the venue ceiling now reaches every rig
+
+`Limits.apply` was the last thing still walking par7/head13 offsets, so on
+halo-portal, keycode-arena and keycode-basic the venue ceiling, the strobe
+clamp and the head keep-out were all no-ops. It now works from
+`Rigmap.roles` — the profile-derived map — and the old walk survives as
+`_apply_legacy` for shows baked before layouts carried a fixture list.
+
+**Proof it changed nothing it shouldn't:** on club16-2head, arc4-head and
+echostage, **0 of 400 random frames** differ between the new path and the old.
+Byte-identical.
+
+**Proof it does something now:** with `max_intensity.head = 0.85`, the mean of
+the head level channels over a real bake:
+
+| rig | before | after |
+|---|---|---|
+| club16-2head | 68.4 | 57.7 (84%) |
+| halo-portal | 80.9 → unclamped | 68.4 (84%) |
+| keycode-arena | 80.9 → unclamped | 68.4 (84%) |
+
+Three things were not obvious going in.
+
+**A strobe channel is not one thing.** On a par7 it is a rate (0 off, 255
+fastest). On a wash12 or spot29 it is a SHUTTER, and the profile's
+`strobe_range` says which value holds it open (32) and which band strobes
+(50–72, 64–95). Clamping the second kind as if it were the first closes a
+shutter that was merely open — the rig going dark, not the rig getting safer.
+`_strobe_clamp` clamps within each fixture's own band, and `allowed: false`
+now sends a wash or spot to 32 (**shutter open, lamp still lit**) rather than 0.
+par7 behaviour is unchanged to the value.
+
+**The keep-out cannot be enforced on most movers, and that is a data gap, not a
+code gap.** A zone is written in degrees, so checking it needs the fixture's
+pan centre and total travel. Only head13 knows its own: 169 and 540°, measured
+on the real head by rig.py. No profile stated it, so `head13.profile.json` now
+declares a `pan` block with `measured: true`. No GDTF files are in the repo, so
+spot29 / wash12 / laser8 cannot be calibrated from anything here. 540° is the
+common figure for a Robe MMX and a MAC Aura — but guessing the one number the
+zone turns on is exactly how the zone was wrong before (0.29–0.35 instead of
+the real 0.385–0.459).
+
+So an uncalibrated mover is counted as **unchecked** and reported, rather than
+assumed safe or silently blacked out. `/api/limits` now carries
+`keep_out_unchecked`. On a real bake it reads `{spot29: 2256, wash12: 2256,
+laser8: 752}` for halo and `{wash12: 2256, spot29: 3008, laser8: 752}` for arena.
+
+**To close it**, one number per fixture type — total pan travel in degrees, from
+the fixture's own manual or GDTF — added to each profile as
+`"pan": {"centre_dmx": ..., "travel_deg": ..., "measured": true}`. The code then
+enforces the zone on them with no further change. Until then the demo room's
+"the bar" zone protects the head13 rigs only, which is what it protected before,
+but now you can see that rather than having to read `Rigmap.__init__` to find
+out.
+
+Sanity check on the existing config, since it was worth confirming: the zone
+−150°..−110° converts to dial 0.385–0.459, which matches the measured zone.
+
+Verified: halo-portal 0 of 37 songs fail to bake; 322 UI tests pass; build clean.
