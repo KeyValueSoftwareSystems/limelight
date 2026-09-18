@@ -12,8 +12,8 @@ import fs from "node:fs";
 import path from "node:path";
 import {
   worldOf, norm, staticAim, aimOf, throwOf, landingOf, roomOf, cameraOf, barsOf, bodyOf,
-  deckOf, towersOf, boothOf, screensOf,
-  type Deck, type Vec3,
+  deckOf, towersOf, boothOf, screensOf, surfaceHit,
+  type Deck, type Vec3, type Walls,
 } from "./stage3d.ts";
 import type { Fixture, LampState } from "./types.ts";
 
@@ -196,6 +196,33 @@ test("a body is sized by what the device is", () => {
     const b = bodyOf(t);
     assert.ok(b.radius > 0 && b.length > 0, `${t} has no size`);
   }
+});
+
+/* ── beams landing on surfaces (floor and walls) ──────────────────────────── */
+
+const WALLS: Walls = { backZ: -3, minX: -8, maxX: 8, wallTop: 10, frontZ: 12 };
+
+test("a level beam aimed upstage lands on the back wall, not on into open air", () => {
+  const hit = surfaceHit([0, 3, 5], norm([0, 0, -1]), 50, undefined, WALLS);
+  assert.ok(hit, "it should hit the upstage wall");
+  assert.deepEqual(hit!.point, [0, 3, -3], "at the wall plane");
+  assert.deepEqual(hit!.normal, [0, 0, 1], "with the wall facing the crowd");
+});
+
+test("a beam aimed sideways lands on the side wall", () => {
+  const hit = surfaceHit([0, 3, 5], norm([1, 0, 0]), 50, undefined, WALLS)!;
+  assert.equal(hit.point[0], 8, "on the +x wall");
+  assert.deepEqual(hit.normal, [-1, 0, 0], "facing back inward");
+});
+
+test("the nearest surface wins: a downward-and-back beam hits the floor before the wall", () => {
+  const hit = surfaceHit([0, 4, 0], norm([0, -1, -0.2]), 50, undefined, WALLS)!;
+  assert.equal(hit.point[1], 0, "it lands on the floor");
+  assert.deepEqual(hit.normal, [0, 1, 0]);
+});
+
+test("a beam into open air above the walls returns no hit", () => {
+  assert.equal(surfaceHit([0, 3, 5], norm([0, 1, 0.2]), 50, undefined, WALLS), null);
 });
 
 /* ── the stage set: deck, towers, booth ──────────────────────────────────── */
