@@ -13,6 +13,7 @@
  */
 
 import type { Fixture, LampState } from "./types";
+import type { WorldBounds } from "./fixtures.ts";
 import { profileOf, moves, type FixtureKind } from "./profiles.ts";
 import { placeFixtures } from "./fixtures.ts";
 
@@ -49,8 +50,13 @@ function colourAt(bar: number): [number, number, number] {
  * `fixtures` is the layout's own list, so the loop lands on whatever the room
  * actually has: a rig with no blinder simply never gets the blinder stab.
  */
-export function demoStates(fixtures: Fixture[], t: number, geometry?: string | null): { lamps: LampState[] } {
-  const place = placeFixtures({ fixtures, geometry } as never);
+export function demoStates(
+  fixtures: Fixture[],
+  t: number,
+  geometry?: string | null,
+  bounds?: WorldBounds,
+): { lamps: LampState[] } {
+  const place = placeFixtures({ fixtures, geometry } as never, bounds);
   if (!place.lamps.length) return { lamps: [] };
 
   const time = ((t % LOOP) + LOOP) % LOOP;

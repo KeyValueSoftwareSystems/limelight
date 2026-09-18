@@ -7,6 +7,7 @@ import type {
   LampState,
   ParState,
   HeadState,
+  Room,
   TrimState,
 } from "./types";
 import { GAMMA, level, wheelAt, PAN_CENTRE, PAN_DEG_PER_DMX, TILT_WALL, TILT_WALL_EL, TILT_DEG_PER_DMX, DEG } from "./dmx.ts";
@@ -75,13 +76,32 @@ export function unplaceFixture(
   };
 }
 
+/**
+ * The bounds a layout DECLARES, if it declares any.
+ *
+ * Without one, a rig's extent is whatever its fixtures happen to span, so the
+ * room grows and shrinks as fixtures are added and the same rig drawn twice is
+ * two different pictures. A venue built in the builder states its room instead,
+ * and then the builder and the designer are looking at the same one. Nothing
+ * declares a room today, so every existing layout keeps its derived extent.
+ */
+export function roomBounds(room: Room | null | undefined): WorldBounds | undefined {
+  if (!room || !(room.width > 0) || !(room.height > 0)) return undefined;
+  return {
+    x: { lo: -room.width / 2, span: room.width },
+    depth: { lo: 0, span: Math.max(0.01, room.depth) },
+    height: { lo: 0, span: room.height },
+  };
+}
+
 export function placeFixtures(show: Show | null, bounds?: WorldBounds): FixturePlacement {
   const fx = show?.fixtures ?? [];
   if (!fx.length) return { lamps: [], pars: [], heads: [] };
 
-  const X = bounds?.x ?? spanOf(fx.map((f: Fixture) => f.at?.[0] ?? 0));
-  const D = bounds?.depth ?? spanOf(fx.map((f: Fixture) => f.at?.[1] ?? 0));
-  const H = bounds?.height ?? spanOf(fx.map((f: Fixture) => f.at?.[2] ?? 0));
+  const pinned = bounds ?? roomBounds(show?.room);
+  const X = pinned?.x ?? spanOf(fx.map((f: Fixture) => f.at?.[0] ?? 0));
+  const D = pinned?.depth ?? spanOf(fx.map((f: Fixture) => f.at?.[1] ?? 0));
+  const H = pinned?.height ?? spanOf(fx.map((f: Fixture) => f.at?.[2] ?? 0));
   /* a rig with one truss has no depth and no height to read; keep it on the old
      single-line geometry rather than dividing by a span that is really zero */
   const flatDepth = D.span < 0.01;

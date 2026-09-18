@@ -6,8 +6,9 @@ import * as api from "@/lib/api";
 import { ArrowLeft, Minus, Plus, Trash2 } from "lucide-react";
 import { Field, Button } from "@/components/ui";
 import { RigPreview } from "@/components/venues/RigPreview";
-import { RigPlan, type Placed } from "@/components/venues/RigPlan";
-import type { Fixture } from "@/lib/types";
+import { StagePlan, type Placed } from "@/components/venues/StagePlan";
+import { RoomFields, DEFAULT_ROOM } from "@/components/venues/RoomFields";
+import type { Fixture, Room } from "@/lib/types";
 
 const KINDS: { id: string; label: string; blurb: string; z: number; y: number }[] = [
   { id: "par5", label: "PAR", blurb: "Flat colour wash, 5 channels", z: 2.4, y: 0 },
@@ -18,6 +19,19 @@ const KINDS: { id: string; label: string; blurb: string; z: number; y: number }[
   { id: "laser8", label: "Laser", blurb: "8 channels", z: 1.2, y: 0.8 },
   { id: "pixelbar24", label: "Pixel bar", blurb: "24 cells, 24 channels", z: 1.0, y: 0.2 },
 ];
+
+function roomAround(fixtures: Fixture[]): Room {
+  const xs = fixtures.map((f) => f.at?.[0] ?? 0);
+  const zs = fixtures.map((f) => f.at?.[2] ?? 0);
+  const ys = fixtures.map((f) => f.at?.[1] ?? 0);
+  if (!xs.length) return DEFAULT_ROOM;
+  const half = Math.max(1.5, ...xs.map(Math.abs));
+  return {
+    width: Math.ceil(half * 2 + 1),
+    height: Math.max(3, Math.ceil(Math.max(...zs) + 1)),
+    depth: Math.max(2, Math.ceil(Math.max(...ys) - Math.min(...ys) + 2)),
+  };
+}
 
 const SPREAD: Record<string, number> = {
   par5: 0.75, wash12: 1.1, spot29: 1.3, blinder1: 1.6,
@@ -33,6 +47,7 @@ export default function EditVenuePage() {
   const [name, setName] = useState("");
   const [rigName, setRigName] = useState("House rig");
   const [placed, setPlaced] = useState<Placed[]>([]);
+  const [room, setRoom] = useState<Room>(DEFAULT_ROOM);
   const [loaded, setLoaded] = useState(false);
   const [locked, setLocked] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
@@ -67,6 +82,7 @@ export default function EditVenuePage() {
               at: [f.at![0], f.at![1], f.at![2]] as [number, number, number],
             })),
         );
+        setRoom(rig?.room ?? roomAround(rig?.fixture_list ?? []));
         nextKey.current = (rig?.fixture_list ?? []).length;
         setLoaded(true);
       })
@@ -81,8 +97,8 @@ export default function EditVenuePage() {
   }, [placed]);
 
   const body = useMemo(
-    () => JSON.stringify(placed.map((f) => ({ type: f.type, at: f.at }))),
-    [placed],
+    () => JSON.stringify({ placed: placed.map((f) => ({ type: f.type, at: f.at })), room }),
+    [placed, room],
   );
 
   /* The patch and the preview both come from the server, so what is drawn is
@@ -93,7 +109,7 @@ export default function EditVenuePage() {
     fetch("/api/venues", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ dry: true, name: name || "Preview", placed: JSON.parse(body) }),
+      body: JSON.stringify({ dry: true, name: name || "Preview", ...JSON.parse(body) }),
     })
       .then((r) => r.json())
       .then((d) => {
@@ -142,6 +158,7 @@ export default function EditVenuePage() {
           id: venueId,
           name,
           rig_name: rigName,
+          room,
           placed: placed.map((f) => ({ type: f.type, at: f.at })),
         }),
       });
@@ -153,7 +170,7 @@ export default function EditVenuePage() {
     } finally {
       setSaving(false);
     }
-  }, [venueId, name, rigName, placed, router]);
+  }, [venueId, name, rigName, room, placed, router]);
 
   const over = channels > UNIVERSE;
   const chosen = placed.find((f) => f.key === selected);
@@ -216,9 +233,9 @@ export default function EditVenuePage() {
             </div>
 
             <div className="panel rounded-[var(--radius-lg)] p-[14px] flex flex-col gap-[10px]">
-              <div className="flex items-baseline gap-[8px]">
-                <span className="text-[11px] font-medium text-ink-dimmer">Plan</span>
-                <span className="flex-1" />
+              <div className="flex items-end gap-[12px] flex-wrap">
+                <RoomFields room={room} onChange={setRoom} />
+                <span className="flex-1 min-w-[8px]" />
                 <span className="mono text-[11px] text-ink-dimmer tabular-nums">
                   {chosen
                     ? `${chosen.at[0].toFixed(2)} m across · ${chosen.at[2].toFixed(2)} m up`
@@ -238,8 +255,9 @@ export default function EditVenuePage() {
                   </button>
                 )}
               </div>
-              <RigPlan
-                fixtures={placed}
+              <StagePlan
+                placed={placed}
+                room={room}
                 selected={selected}
                 onMove={moveOne}
                 onSelect={setSelected}
@@ -293,7 +311,7 @@ export default function EditVenuePage() {
           </section>
 
           <aside className="panel rounded-[var(--radius-lg)] overflow-hidden lg:sticky lg:top-[92px]">
-            <RigPreview fixtures={preview} className="w-full aspect-[3/2]" />
+            <RigPreview fixtures={preview} room={room} className="w-full aspect-[3/2]" />
             <div className="px-[14px] py-[13px] flex flex-col gap-[7px]">
               <span className="text-[13px] font-semibold text-ink">
                 {name.trim() || "Untitled venue"}

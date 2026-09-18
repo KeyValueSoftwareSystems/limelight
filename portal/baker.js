@@ -571,6 +571,7 @@ const show = {
   rig: rigName,
   layout: manifest.layout_file,
   geometry: layout.geometry || "line",
+  room: layout.room || null,
   channels: TOTAL_CH,
   fixtures,
   style: "limelight-v2",
