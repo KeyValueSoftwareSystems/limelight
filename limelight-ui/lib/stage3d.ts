@@ -132,6 +132,73 @@ export function landingOf(origin: Vec3, dir: Vec3, maxThrow: number, deck?: Deck
   return [origin[0] + dir[0] * t, 0, origin[2] + dir[2] * t];
 }
 
+/* ── where a beam lands on a surface ──────────────────────────────────────────
+   The floor is not the only thing a beam can hit. Aimed level or upstage it meets
+   a wall; without that, the shaft runs straight through the walls and screens and
+   nothing lights up where it lands. These are the room's vertical surfaces. */
+
+export interface Walls {
+  /** the upstage wall plane (faces +Z, toward the crowd) */
+  backZ: number;
+  /** the two side wall planes (face inward) */
+  minX: number; maxX: number;
+  /** walls run from the floor up to here */
+  wallTop: number;
+  /** side walls run from backZ to this downstage limit */
+  frontZ: number;
+}
+
+export interface Hit { point: Vec3; normal: Vec3; dist: number; }
+
+/**
+ * The nearest surface a beam meets — floor, deck, or a wall — with the surface
+ * normal so a glow can be laid flat against it. Returns null when the beam
+ * escapes into open air (aimed up, into no wall) within maxThrow.
+ */
+export function surfaceHit(origin: Vec3, dir: Vec3, maxThrow: number, deck?: Deck, walls?: Walls): Hit | null {
+  let best: Hit | null = null;
+  const consider = (t: number, point: Vec3, normal: Vec3) => {
+    if (t <= 0.01 || t > maxThrow) return;
+    if (!best || t < best.dist) best = { point, normal, dist: t };
+  };
+
+  if (deck && dir[1] < -1e-4 && origin[1] > deck.top) {          // deck top
+    const t = (origin[1] - deck.top) / -dir[1];
+    const x = origin[0] + dir[0] * t, z = origin[2] + dir[2] * t;
+    if (x >= deck.minX && x <= deck.maxX && z >= deck.minZ && z <= deck.maxZ) {
+      consider(t, [x, deck.top, z], [0, 1, 0]);
+    }
+  }
+  if (dir[1] < -1e-4) {                                          // floor
+    const t = origin[1] / -dir[1];
+    consider(t, [origin[0] + dir[0] * t, 0, origin[2] + dir[2] * t], [0, 1, 0]);
+  }
+  if (walls) {
+    if (dir[2] < -1e-4) {                                        // upstage wall
+      const t = (origin[2] - walls.backZ) / -dir[2];
+      const x = origin[0] + dir[0] * t, y = origin[1] + dir[1] * t;
+      if (x >= walls.minX && x <= walls.maxX && y >= 0 && y <= walls.wallTop) {
+        consider(t, [x, y, walls.backZ], [0, 0, 1]);
+      }
+    }
+    if (dir[0] < -1e-4) {                                        // left wall
+      const t = (origin[0] - walls.minX) / -dir[0];
+      const y = origin[1] + dir[1] * t, z = origin[2] + dir[2] * t;
+      if (z >= walls.backZ && z <= walls.frontZ && y >= 0 && y <= walls.wallTop) {
+        consider(t, [walls.minX, y, z], [1, 0, 0]);
+      }
+    }
+    if (dir[0] > 1e-4) {                                         // right wall
+      const t = (walls.maxX - origin[0]) / dir[0];
+      const y = origin[1] + dir[1] * t, z = origin[2] + dir[2] * t;
+      if (z >= walls.backZ && z <= walls.frontZ && y >= 0 && y <= walls.wallTop) {
+        consider(t, [walls.maxX, y, z], [-1, 0, 0]);
+      }
+    }
+  }
+  return best;
+}
+
 /* ── the room the rig is in ──────────────────────────────────────────────── */
 
 export interface RoomBounds {

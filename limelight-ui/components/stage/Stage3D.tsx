@@ -23,8 +23,8 @@ import { profileOf, moves } from "@/lib/profiles";
 import { DEG } from "@/lib/dmx";
 import { frameLight, roomAmbient } from "@/lib/exposure";
 import {
-  worldOf, aimOf, throwOf, landingOf, roomOf, cameraOf, barsOf, bodyOf, staticAim,
-  deckOf, towersOf, boothOf, screensOf, type Deck,
+  worldOf, aimOf, roomOf, cameraOf, barsOf, bodyOf, staticAim,
+  deckOf, towersOf, boothOf, screensOf, surfaceHit, type Deck, type Walls,
 } from "@/lib/stage3d";
 import { buildFixture, fixtureMaterials } from "@/lib/fixtureMesh";
 import type { AnchoredClock } from "@/hooks/useAnchoredClock";
@@ -178,6 +178,8 @@ interface Rig {
   cells: Array<{ sprite: THREE.Sprite; mat: THREE.SpriteMaterial }>;
   maxThrow: number;
   deck: Deck;
+  /** the room's walls, so a beam lands and glows on them instead of passing through */
+  walls: Walls;
 }
 
 /** A soft round sprite, used for every lens flare and floor pool. */
@@ -248,7 +250,11 @@ function updateRig(rig: Rig, byId: Map<string, LampState>, t: number, d: number)
     rig.head.rotation.x = rig.floorHead ? (Math.PI / 2 - el) : -(Math.PI / 2 + el);
   }
 
-  const len = throwOf(rig.lamp.world, dir, rig.maxThrow, rig.deck);
+  /* the nearest surface the beam meets — floor, deck or a wall. The shaft stops
+     there (so it no longer runs through the walls and screens) and its glow is
+     laid against that surface below. */
+  const hit = surfaceHit(rig.lamp.world, dir, rig.maxThrow, rig.deck, rig.walls);
+  const len = hit ? hit.dist : rig.maxThrow;
   /* zoom is live, so the cone is rescaled every frame, not just aimed */
   const spread = Math.tan(Math.min(70, l.spreadDeg) * 0.5 * Math.PI / 180);
   const r = Math.max(0.02, len * spread);
@@ -290,14 +296,20 @@ function updateRig(rig: Rig, byId: Map<string, LampState>, t: number, d: number)
   }
 
   if (rig.pool && rig.poolMat) {
-    const at = landingOf(rig.lamp.world, dir, rig.maxThrow, rig.deck);
-    if (at && k > 0.01) {
+    if (hit && k > 0.01) {
       const pr = Math.max(0.55, r * 2.5);
       rig.pool.visible = true;
-      rig.pool.position.set(at[0], at[1] + 0.02, at[2]);
+      /* sit just off the surface and lie flat against it — floor, deck OR wall */
+      rig.pool.position.set(
+        hit.point[0] + hit.normal[0] * 0.02,
+        hit.point[1] + hit.normal[1] * 0.02,
+        hit.point[2] + hit.normal[2] * 0.02,
+      );
+      POOL_N.set(hit.normal[0], hit.normal[1], hit.normal[2]);
+      rig.pool.quaternion.setFromUnitVectors(POOL_UP, POOL_N);
       rig.pool.scale.set(pr, pr, 1);
-      /* same overlap problem as the beams: twenty-two pars' pools converge on the
-         deck centre and stack to white, so density is folded in here too */
+      /* same overlap problem as the beams: many pools converge and stack to white,
+         so density is folded in here too */
       rig.poolMat.opacity = Math.min(0.32, k * 0.32 * d * (0.4 + 0.6 * d));
       rig.poolMat.color.setRGB(l.rgb[0], l.rgb[1], l.rgb[2]);
     } else {
@@ -319,6 +331,9 @@ function blankRig(rig: Rig): void {
 /* scratch, so a 46-fixture frame does not allocate 92 vectors */
 const AIM_FROM = new THREE.Vector3();
 const AIM_TO = new THREE.Vector3();
+/* the glow quad is built facing +Z; POOL_N is the surface normal it is turned onto */
+const POOL_UP = new THREE.Vector3(0, 0, 1);
+const POOL_N = new THREE.Vector3();
 const ZERO_CELL = { k: 0, rgb: [0, 0, 0] as [number, number, number] };
 
 interface Stage3DProps {
@@ -602,6 +617,15 @@ export function Stage3D({ clockRef, playing, currentTime, onHome }: Stage3DProps
       scene.add(side);
     }
 
+    /* the wall planes as maths, so a beam lands and glows on them (see surfaceHit) */
+    const wallsBounds: Walls = {
+      backZ: room.minZ - 2.6,
+      minX: room.centreX - deckW / 2,
+      maxX: room.centreX + deckW / 2,
+      wallTop: wallH,
+      frontZ: room.centreZ + deckD / 2,
+    };
+
     /* ── the steel: box-truss, goalpost towers, hanging motors ──────────────── */
     const steelMat = new THREE.MeshStandardMaterial({ color: 0x3c424e, roughness: 0.45, metalness: 0.82 });
     const motorMat = new THREE.MeshStandardMaterial({ color: 0x17181c, roughness: 0.6, metalness: 0.4 });
@@ -638,7 +662,7 @@ export function Stage3D({ clockRef, playing, currentTime, onHome }: Stage3DProps
         c.position.set(cx, y + dy, z + dz);
         scene.add(c);
       }
-      const bays = Math.max(2, Math.round(len / 0.7));
+      const bays = Math.max(2, Math.round(len / 1.1));   // fewer struts — lighter, less busy
       const bay = len / bays;
       const vGeo = new THREE.BoxGeometry(0.026, TS, 0.026);
       const dGeo = new THREE.BoxGeometry(0.022, Math.hypot(bay, TS), 0.022);
@@ -689,16 +713,68 @@ export function Stage3D({ clockRef, playing, currentTime, onHome }: Stage3DProps
       scene.add(m);
     };
 
+    /* a light single-tube bar, for the small artistic fixture clusters that would
+       read as clutter if every one got a full box-truss */
+    const addThinBar = (x0: number, x1: number, y: number, z: number) => {
+      const bar = new THREE.Mesh(new THREE.BoxGeometry(x1 - x0 + 0.5, 0.05, 0.05), steelMat);
+      bar.position.set((x0 + x1) / 2, y, z);
+      scene.add(bar);
+    };
+
+    /* A full box-truss is only warranted for a wide overhead run; a rig laid out
+       as many small groups (echostage's crown) otherwise becomes a wall of
+       frames. Narrow groups get a light bar. */
     const bars = barsOf(fixtures);
+    const mainSpan = room.width * 0.55;
+    const isWide = (b: typeof bars[number]) => (b.x1 - b.x0) >= mainSpan;
+    const flown: { x0: number; x1: number; y: number; z: number }[] = [];
     for (const bar of bars) {
       if (bar.kind === "curve") { addCurve(bar.points); continue; }   // arches are self-standing
       if (bar.y < 1) continue;   // a floor rig stands on the deck — no overhead truss or stand
-      addHTruss(bar.x0, bar.x1, bar.y, bar.z);
-      addMotor(bar.x0, bar.y, bar.z);
-      addMotor(bar.x1, bar.y, bar.z);
+      if (isWide(bar)) {
+        addHTruss(bar.x0, bar.x1, bar.y, bar.z);
+        addMotor(bar.x0, bar.y, bar.z);
+        addMotor(bar.x1, bar.y, bar.z);
+      } else {
+        addThinBar(bar.x0, bar.x1, bar.y, bar.z);
+      }
+      flown.push({ x0: bar.x0, x1: bar.x1, y: bar.y, z: bar.z });
     }
-    /* goalpost towers only under straight overhead trusses, not arches or floor rigs */
-    for (const t of towersOf(bars.filter((b) => b.kind !== "curve" && b.y > 1))) addTower(t.x, t.z, t.yTop);
+
+    /* Overhead trusses hang from house rigging, not from nothing — without it they
+       read as frames floating in the air. Draw a light rigging grid up top and drop
+       each truss from it; the single widest truss also stands on goalpost towers. */
+    const mainTruss = bars.filter((b) => b.kind !== "curve" && b.y > 1 && isWide(b))
+      .sort((a, b) => (b.x1 - b.x0) - (a.x1 - a.x0))[0];
+    if (flown.length) {
+      const rigTop = room.maxY + 1.0;
+      const gx0 = room.minX - 0.4, gx1 = room.maxX + 0.4;
+      const beamXGeo = new THREE.BoxGeometry(gx1 - gx0, 0.05, 0.05);
+      const zs = [...new Set(flown.map((b) => Math.round(b.z * 100) / 100))];
+      for (const z of zs) {
+        const beam = new THREE.Mesh(beamXGeo, steelMat);
+        beam.position.set((gx0 + gx1) / 2, rigTop, z);
+        scene.add(beam);
+      }
+      if (zs.length > 1) {                       // tie the grid front-to-back
+        const zmin = Math.min(...zs) - 0.2, zmax = Math.max(...zs) + 0.2;
+        const beamZGeo = new THREE.BoxGeometry(0.05, 0.05, zmax - zmin);
+        for (const gx of [gx0, gx1]) {
+          const b = new THREE.Mesh(beamZGeo, steelMat);
+          b.position.set(gx, rigTop, (zmin + zmax) / 2);
+          scene.add(b);
+        }
+      }
+      const addHang = (x: number, y: number, z: number) => {
+        const h = rigTop - y;
+        if (h < 0.2) return;
+        const rod = new THREE.Mesh(new THREE.BoxGeometry(0.03, h, 0.03), steelMat);
+        rod.position.set(x, y + h / 2, z);
+        scene.add(rod);
+      };
+      for (const b of flown) { addHang(b.x0, b.y, b.z); addHang(b.x1, b.y, b.z); }
+    }
+    if (mainTruss) for (const t of towersOf([mainTruss])) addTower(t.x, t.z, t.yTop);
 
     /* ── one rig entry per fixture ── */
     const fmats = fixtureMaterials();
@@ -795,8 +871,8 @@ export function Stage3D({ clockRef, playing, currentTime, onHome }: Stage3DProps
           map: disc, transparent: true, blending: THREE.AdditiveBlending,
           depthWrite: false, opacity: 0, side: THREE.DoubleSide,
         });
+        /* built facing +Z; updateRig turns it onto whatever surface it lands on */
         pool = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), poolMat);
-        pool.rotation.x = -Math.PI / 2;
         pool.position.set(world[0], 0.02, world[2]);
         pool.renderOrder = 4;
         pool.visible = false;
@@ -807,6 +883,7 @@ export function Stage3D({ clockRef, playing, currentTime, onHome }: Stage3DProps
         lamp: { id: f.id, type: f.type, kind: prof.kind, world },
         yoke: fm.yoke, head: fm.head, floorHead: onFloor && moves(f.type),
         beam, beamMat, lens, lensMat, pool, poolMat, cells, maxThrow, deck: deckBox,
+        walls: wallsBounds,
       });
     }
     rigsRef.current = rigs;
