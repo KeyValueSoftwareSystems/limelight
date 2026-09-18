@@ -42,7 +42,11 @@ export function ShowCard({
             onPointerEnter={() => setHover(true)}
             onPointerLeave={() => setHover(false)}
           >
-            <LivePreview show={show} visible={visible} running={hover} />
+            {show.thumbnail ? (
+              <img src={show.thumbnail} alt={show.name} className="w-full h-full object-cover" loading="lazy" />
+            ) : (
+              <LivePreview show={show} visible={visible} running={hover} />
+            )}
           </div>
           <span className="absolute inset-x-0 bottom-0 pointer-events-none flex items-center gap-[3px] px-[10px] pb-[9px] z-10" aria-hidden>
             {colours.map((c, i) => (

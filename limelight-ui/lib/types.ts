@@ -322,6 +322,7 @@ export interface ShowFile {
   score_version?: number | null;
   designed_for?: { venue_id: string; venue_name: string; layout?: string } | null;
   invalid?: string;
+  thumbnail?: string;
   /* The v2 plan this show was saved from, where there is one. A saved show is
      otherwise just {seed, edits}, which only reconstructs on the legacy bake —
      a show built from a plan needs the plan back to open into the same

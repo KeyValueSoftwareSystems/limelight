@@ -991,6 +991,10 @@ class Shows:
             doc.setdefault("author", "unknown")
             if doc.get("market_only") and not include_market:
                 continue
+            sid = doc.get("id", fn[:-len(".show.json")])
+            thumb = os.path.join(MARKET, "thumbs", sid + ".jpg")
+            if os.path.isfile(thumb):
+                doc["thumbnail"] = "/market/thumbs/" + sid + ".jpg"
             out.append({"file": fn, **doc})
         return out
 
