@@ -1416,3 +1416,32 @@ sampled frames lit, peak 255.
 Near misses checked while in there: `ENDS` already filters, `CENTRE` branches on
 parity so an even par count does not produce a fractional index, and `lampN`
 guards. `setHead`/`setPar` were the only gap.
+
+### The play button did nothing for any song with a space in its name
+
+`_proxy_audio` decoded the song name out of the URL and then built the hub URL
+by concatenation:
+
+```python
+urllib.request.Request(HUB + "/hub/audio/" + audio)
+```
+
+`urllib` rejects a path containing a raw space, so the handler raised
+`http.client.InvalidURL` — which is an `HTTPException`, not a `URLError`, so
+neither `except` caught it. The thread died, the socket closed with no response,
+and the dev server turned that into a 500. The page had no audio and the play
+button looked inert.
+
+Every other hub URL in the file already went through `urllib.parse.quote`; this
+one did not. It does now, and `HTTPException` is caught so a bad name gives a
+clean 502 instead of a dead socket.
+
+Measured through the dev server: 4 of the 36 songs have spaces in their names,
+and all of them 404'd or 500'd before. After, the only failure left is `makeba`,
+which genuinely has no mp3 — a score dir from 16 Sep with no audio beside it,
+unrelated to this bug. In the browser, the reported song now runs 0:00.000 →
+0:03.799 in 3.5s with the button flipping to Pause and no console errors.
+
+**Trap for next time:** a headless Chrome driven over CDP really does play audio
+out of the speakers, and exiting the script does not stop it. Pause, or kill the
+browser, before leaving.

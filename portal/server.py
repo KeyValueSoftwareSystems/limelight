@@ -17,6 +17,7 @@ otherwise, and the page wants a Uint8Array at the end of it anyway.
 import argparse
 import functools
 import hashlib
+import http.client
 import json
 import mimetypes
 import os
@@ -2241,7 +2242,7 @@ def make_handler(library, baker, rig):
             audio = library.audio_for(song)
             if not audio:
                 return self._json({"error": "no audio for %s" % song}, 404)
-            req = urllib.request.Request(HUB + "/hub/audio/" + audio)
+            req = urllib.request.Request(HUB + "/hub/audio/" + urllib.parse.quote(audio))
             rng = self.headers.get("Range")
             if rng:
                 req.add_header("Range", rng)
@@ -2251,6 +2252,8 @@ def make_handler(library, baker, rig):
                 return self._json({"error": "hub returned %s for %s" % (e.code, audio)}, e.code)
             except urllib.error.URLError as e:
                 return self._json({"error": "hub unreachable: %s" % e}, 502)
+            except http.client.HTTPException as e:
+                return self._json({"error": "cannot ask the hub for %r: %s" % (audio, e)}, 502)
             with up:
                 self.send_response(up.status)
                 for h in ("Content-Type", "Content-Length", "Content-Range"):
