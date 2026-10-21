@@ -62,9 +62,9 @@ def second_opinion(path, slug):
         return np.load(at)[:, 0]
     try:
         from beat_this.inference import File2Beats
+        beats, _ = File2Beats(device="cpu", dbn=False)(path)
     except Exception:
         return None
-    beats, _ = File2Beats(device="cpu", dbn=False)(path)
     beats = np.asarray(beats, dtype=float)
     at.parent.mkdir(parents=True, exist_ok=True)
     np.save(at, np.stack([beats, np.zeros(len(beats))], axis=1))
