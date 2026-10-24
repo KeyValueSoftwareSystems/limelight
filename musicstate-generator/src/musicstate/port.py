@@ -167,8 +167,14 @@ def to_map(state: dict, vec_filename: str | None = None,
     period = round(60.0 / bpm, 5) if bpm else None
     phase = beats[0] if beats else 0.0
     bar_phase = beats.index(downbeats[0]) if (downbeats and downbeats[0] in beats) else 0
+    ts = str(meta.get("time_signature") or "4/4")
+    try:
+        beats_per_bar = int(ts.split("/")[0])
+    except (ValueError, IndexError):
+        beats_per_bar = 4
     grid = {
         "period": period, "phase": phase, "bpm": bpm, "bar_phase": bar_phase,
+        "beats_per_bar": beats_per_bar,
         "locked": False, "how": "allin1 beat tracking",
         "note": "beats start at the first tracked beat, not at t=0",
     }
@@ -240,19 +246,27 @@ def to_map(state: dict, vec_filename: str | None = None,
         spans.append({"kind": "build", "from": frm, "to": to, "rise": "steady",
                       "bars": bars, "how": "derived: build moment to the next drop moment"})
 
-    # ---- stems: list-of-dicts -> per-stem arrays + explicit guitar/piano zeros ----
+    # ---- stems: per-bar levels, passed through ----
     st = state.get("stems") or {}
-    pd = st.get("per_downbeat") or []
-    names = st.get("names") or []
-    at = [r["t"] for r in pd]
-    sources = {nm: [r.get(nm) for r in pd] for nm in names}
-    for extra in ("guitar", "piano"):
-        sources.setdefault(extra, [0.0] * len(pd))
-    stems = {
-        "model": st.get("model"), "rate": "per_downbeat", "sources": sources, "at": at,
-        "vocal_present_fraction": st.get("vocal_present_fraction"),
-        "note": "Four-stem htdemucs mapped onto the six canonical names.",
-    } if pd else None
+    stems = None
+    if st.get("sources"):
+        comparable = st.get("comparable") is True
+        sources = {nm: list(vals) for nm, vals in st["sources"].items()}
+        n = len(st.get("at") or next(iter(sources.values()), []))
+        # htdemucs 4-stem does not separate guitar/piano (they fold into 'other'); mark
+        # them absent, NOT zero -- a 0 dB level would add spurious energy under the
+        # comparable-sum check that ev_stems runs.
+        fill = -120.0 if comparable else 0.0
+        for extra in ("guitar", "piano"):
+            sources.setdefault(extra, [fill] * n)
+        stems = {
+            "model": st.get("model"), "rate": st.get("rate", "per_downbeat"),
+            "comparable": comparable, "unit": st.get("unit"),
+            "sources": sources, "at": st.get("at"),
+            "levels": st.get("levels"),
+            "vocal_present_fraction": st.get("vocal_present_fraction"),
+            "note": "Four-stem htdemucs; guitar/piano fold into 'other' and are marked absent.",
+        }
 
     # ---- observation tier ----
     sem = state.get("semantic") or {}

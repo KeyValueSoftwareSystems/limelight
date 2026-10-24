@@ -28,6 +28,7 @@ from .analyzers import (
     NoteTranscriptionAnalyzer,
     PumpAnalyzer,
     SemanticAnalyzer,
+    StemSeparationAnalyzer,
     StemsAnalyzer,
     StructureAnalyzer,
 )
@@ -52,6 +53,7 @@ def deep_analyzers() -> list[Analyzer]:
         GridRefineAnalyzer(),    # rigid clock phase-locked to the kick
         BarPhaseAnalyzer(),      # kick-band downbeat phase (allin1 as strong prior)
         MomentDeriveAnalyzer(),  # candidate drops/quiets from labels + energy
+        StemSeparationAnalyzer(),  # demucs once (cached) -> waveforms for the per-stem fields
         AccentsAnalyzer(),       # discrete onsets on the (allin1) beat grid
         ChordsAnalyzer(),        # per-bar chords on the (allin1) beat grid
         MelodyAnalyzer(),        # pyin melody contour

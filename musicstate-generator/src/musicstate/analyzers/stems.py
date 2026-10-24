@@ -1,8 +1,10 @@
-"""L2 observation — Demucs source separation → per-stem presence timeline.
+"""L2 observation — per-stem loudness, in dB against the mix, one value per bar.
 
-Adds a real vocal/instrument-presence signal. Observation tier: it enriches, never
-contradicts, the L2 interface fields. Heavy (downloads htdemucs, runs a net), so it
-belongs to the deep set only.
+Consumes the separated waveforms from StemSeparationAnalyzer (ctx["stems_audio"]);
+this analyzer only measures. Each stem's RMS over a bar is expressed in dB relative
+to the mix's whole-song RMS, so summed as energy the stems track the mix bar by
+bar — which is the invariant a separator preserves and the scorer checks. (The old
+field normalised each stem by its own maximum, which cannot sum to a mix.)
 """
 from __future__ import annotations
 
@@ -20,62 +22,43 @@ class StemsAnalyzer(Analyzer):
     name = "htdemucs"
     level = "L2"
 
-    def available(self) -> tuple[bool, str]:
-        try:
-            import demucs  # noqa: F401
-            import torch  # noqa: F401
-        except Exception as exc:  # noqa: BLE001
-            return False, f"demucs/torch missing ({exc.__class__.__name__})"
-        return True, ""
-
     def analyze(self, audio, sample_rate, ctx):
-        import librosa
-        import torch
-        from demucs.apply import apply_model
-        from demucs.pretrained import get_model
+        stems = ctx.get("stems_audio") or {}
+        downs = ctx.get("downbeats") or []
+        if not stems or len(downs) < 8:
+            return AnalyzerResult(status="not_computed", patch={},
+                                  notes="no separated stems or too few bars")
 
-        model = get_model(DEMUCS_MODEL)
-        model.cpu().eval()
-        model_sr = model.samplerate
-        log.debug("separating with %s at %dHz", DEMUCS_MODEL, model_sr)
+        names = list(stems.keys())
+        audio = np.asarray(audio, dtype=np.float64)
+        mix_ref = float(np.sqrt(np.mean(audio ** 2))) or 1e-6
+        bar = float(np.median(np.diff(downs))) if len(downs) > 1 else 2.0
 
-        resampled = librosa.resample(audio, orig_sr=sample_rate, target_sr=model_sr)
-        wav = torch.from_numpy(np.stack([resampled, resampled])).float()  # fake stereo
-        ref = wav.mean(0)
-        wav = (wav - ref.mean()) / (ref.std() + 1e-8)
-        with torch.no_grad():
-            sources = apply_model(model, wav[None], device="cpu", progress=False)[0]
-        sources = sources * ref.std() + ref.mean()
+        def bar_rms(y, t0, t1):
+            a, b = int(t0 * sample_rate), int(min(t1, len(y) / sample_rate) * sample_rate)
+            seg = np.asarray(y[a:b], dtype=np.float64)
+            return float(np.sqrt(np.mean(seg ** 2))) if len(seg) else 1e-9
 
-        names = list(model.sources)
-        hop = int(0.1 * model_sr)
-        levels = {}
-        for i, name in enumerate(names):
-            mono = sources[i].mean(0).numpy()
-            levels[name] = librosa.feature.rms(y=mono, hop_length=hop)[0]
-        t_axis = librosa.frames_to_time(np.arange(len(next(iter(levels.values())))),
-                                        sr=model_sr, hop_length=hop)
+        sources = {n: [] for n in names}
+        for i, t in enumerate(downs):
+            t1 = downs[i + 1] if i + 1 < len(downs) else t + bar
+            for n in names:
+                sources[n].append(round(20.0 * float(np.log10(bar_rms(stems[n], t, t1) / mix_ref + 1e-9)), 2))
 
-        def presence(rms):
-            top = np.percentile(rms, 99) or 1.0
-            return np.clip(rms / top, 0, 1)
-
-        pres = {name: presence(rms) for name, rms in levels.items()}
-        downbeats = ctx.get("downbeats") or []
-        per_downbeat = []
-        for t in downbeats:
-            j = int(np.clip(np.searchsorted(t_axis, t), 0, len(t_axis) - 1))
-            per_downbeat.append({"t": round(float(t), 3),
-                                 **{name: round(float(pres[name][j]), 3) for name in names}})
-
-        vocal_fraction = None
-        if "vocals" in pres:
-            vocal_fraction = round(float((pres["vocals"] > 0.15).mean()), 3)
+        arrs = {n: np.array(sources[n]) for n in names}
+        levels = {n: {"present": bool(arrs[n].max() > -50.0)} for n in names}
+        vocal_fraction = (round(float((arrs["vocals"] > arrs["vocals"].max() - 20.0).mean()), 3)
+                          if "vocals" in arrs else None)
 
         return AnalyzerResult(
             status="ok",
-            patch={"stems": {"model": DEMUCS_MODEL, "names": names, "rate": "per_downbeat",
-                             "per_downbeat": per_downbeat, "vocal_present_fraction": vocal_fraction}},
-            confidence={"stems": 0.6},
-            notes="per-stem presence vs own 99th pct; observation tier",
+            patch={"stems": {
+                "model": DEMUCS_MODEL, "names": names, "rate": "per_downbeat",
+                "comparable": True,
+                "unit": "dB of the stem's RMS over one bar, against the mix's whole-song RMS",
+                "sources": sources, "at": [round(float(t), 3) for t in downs],
+                "levels": levels, "vocal_present_fraction": vocal_fraction,
+            }},
+            confidence={"stems": 0.7},
+            notes="per-bar dB levels vs the mix (comparable)",
         )
